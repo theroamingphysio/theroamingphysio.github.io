@@ -1,0 +1,99 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+header {
+    background: #581845;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+nav {
+    text-align: center;
+    background: #a45022;
+    padding: 10px 0;
+}
+nav a {
+    color: #fff;
+    margin: 0 15px;
+    text-decoration: none;
+}
+.hero {
+    position: relative;
+    background: url('./resources/images/Physiotherapy.jpg') no-repeat center center/cover;
+    color: #fff;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.hero .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Adjust the opacity as needed */
+    z-index: 1;
+}
+.hero .hero-content {
+    position: relative;
+    z-index: 2;
+}
+.hero h1 {
+    font-size: 3em;
+}
+.hero p {
+    font-size: 1.5em;
+}
+.cta {
+    background: #e8491d;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    margin-top: 20px;
+    display: inline-block;
+}
+.container {
+    padding: 20px;
+}
+.container h2 {
+    color: #333;
+}
+
+.testimonials blockquote,
+.blog-preview article {
+    display: flex;
+    align-items: center;
+}
+
+.testimonials .testimonial-img,
+.blog-preview .blog-img {
+    border-radius: 50%;
+    margin-right: 1rem;
+    width: 50px;
+    height: 50px;
+}
+
+.services, .testimonials, .blog-preview {
+    background: #fff;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+footer {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+}
+footer a {
+    color: #fff;
+    margin: 0 10px;
+    text-decoration: none;
+}
