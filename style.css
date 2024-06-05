@@ -97,3 +97,35 @@ footer a {
     margin: 0 10px;
     text-decoration: none;
 }
+
+/* For small screens */
+@media (max-width: 767px) {
+    nav a {
+      display: block;
+      margin: 10px 0;
+    }
+  
+    .hero {
+      height: 300px;
+    }
+  
+    .hero h1 {
+      font-size: 2em;
+    }
+  
+    .hero p {
+      font-size: 1.2em;
+    }
+  
+    .testimonials blockquote,
+    .blog-preview article {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .testimonials .testimonial-img,
+    .blog-preview .blog-img {
+      margin-right: 0;
+      margin-bottom: 1rem;
+    }
+  }
