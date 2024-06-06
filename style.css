@@ -301,3 +301,32 @@ button[type="submit"] {
 button[type="submit"]:hover {
     background-color: #45a049;
 }
+
+/* Block Quote Container Styles For Dynamic Testimonials */
+/*********************************************************/
+.testimonials .testimonial-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.testimonials blockquote {
+    display: flex;
+    align-items: center;
+    max-width: 400px;
+    margin: 20px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.testimonials .testimonial-img {
+    width: 50px;
+    height: 50px;
+    margin-right: 20px;
+    background-image: url('human-icon.png');
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+}
