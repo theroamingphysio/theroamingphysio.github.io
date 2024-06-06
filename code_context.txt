@@ -1,103 +1,226 @@
+// File: blog.js
+// In your script.js file
+const blogArticles = [
+	{
+		title: '5 Exercises to Improve Your Posture',
+		date: 'May 15, 2024',
+		excerpt: 'Good posture is crucial for overall health. Here are five exercises to help you maintain a healthy posture...',
+		link: '#'
+	},
+	{
+		title: 'How to Prevent Workplace Injuries',
+		date: 'May 22, 2024',
+		excerpt: 'Workplace injuries are common but preventable. Follow these tips to create a safer work environment...',
+		link: '#'
+	},
+	// Add more blog article objects here
+];
+
+const blogContainer = document.querySelector('.blog-articles');
+const loadMoreButton = document.querySelector('.load-more');
+let currentIndex = 0;
+const articlesPerLoad = 2;
+
+function loadBlogArticles() {
+	const endIndex = currentIndex + articlesPerLoad;
+	for (let i = currentIndex; i < endIndex && i < blogArticles.length; i++) {
+		const article = blogArticles[i];
+		const articleElement = document.createElement('article');
+		articleElement.innerHTML = `
+		<h3>${article.title}</h3>
+		<p><em>${article.date}</em> - ${article.excerpt} <a href="${article.link}">Read more</a></p>`;
+		blogContainer.appendChild(articleElement);
+	}
+	currentIndex = endIndex;
+	if (currentIndex >= blogArticles.length) {
+		loadMoreButton.style.display = 'none';
+	}
+}
+
+loadBlogArticles();
+
+loadMoreButton.addEventListener('click', loadBlogArticles);
+
+
 // File: index.html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="The Roaming Physio - Bringing Expert Physiotherapy to Your Doorstep. Personalized care, wherever you are.">
+    <meta name="description"
+        content="The Roaming Physio - Bringing Expert Physiotherapy to Your Doorstep. Personalized care, wherever you are.">
     <title>The Roaming Physio</title>
+    <link rel="icon" type="image/png" href="path/to/your/favicon.png">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+
+<body class="loaging">
     <header>
         <h1>The Roaming Physio</h1>
         <p>"Bringing Expert Physiotherapy to Your Doorstep"</p>
+        <div class="burger-menu">
+            <div class="line1"></div>
+            <div class="line2"></div>
+            <div class="line3"></div>
+        </div>
+        <nav class="mobile-nav">
+            <span class="close-btn">x </div></span>
+            <a href="#">Home</a>
+            <a href="#about">About</a>
+            <a href="#services">Services</a>
+            <a href="#testimonials">Testimonials</a>
+            <a href="#blog">Blog</a>
+            <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio" target="_blank">Contact</a>
+        </nav>
     </header>
+
     <nav>
         <a href="#">Home</a>
         <a href="#about">About</a>
         <a href="#services">Services</a>
         <a href="#testimonials">Testimonials</a>
         <a href="#blog">Blog</a>
-        <a href="https://wa.me/1234567890?text=Hello%20Roaming%20Physio" target="_blank">Contact</a>
+        <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio" target="_blank">Contact</a>
     </nav>
+
     <section class="hero">
         <div class="overlay"></div>
         <div class="hero-content">
             <h1>Professional Physiotherapy at Your Convenience</h1>
             <p>Personalized care, wherever you are.</p>
-            <a href="https://wa.me/1234567890?text=Hello%20Roaming%20Physio" target="_blank" class="cta">Book an Appointment</a>
+            <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio" target="_blank" class="cta">Book an
+                Appointment</a>
         </div>
     </section>
+
     <div class="container">
         <section id="about">
             <h2>Welcome to The Roaming Physio</h2>
-            <p>At The Roaming Physio, we believe in delivering top-notch physiotherapy services directly to your location. Whether you need treatment at home, work, or elsewhere, our expert physiotherapist, Brivia, is here to help. We specialize in personalized care tailored to your specific needs, ensuring you get the best treatment without the hassle of travel.</p>
+            <p>At The Roaming Physio, we believe in delivering top-notch physiotherapy services directly to your
+                location. Whether you need treatment at home, work, or elsewhere, our expert physiotherapist, Brivia, is
+                here to help. We specialize in personalized care tailored to your specific needs, ensuring you get the
+                best treatment without the hassle of travel.</p>
         </section>
+
         <section id="services" class="services">
             <h2>Our Services</h2>
             <ul>
-                <li><strong>In-Home Physiotherapy:</strong> Personalized treatment plans designed to meet your unique needs in the comfort of your home.</li>
-                <li><strong>Workplace Wellness:</strong> On-site physiotherapy and ergonomic assessments to keep you healthy and productive at work.</li>
-                <li><strong>Sports Rehabilitation:</strong> Specialized care for sports injuries to help you get back in the game faster.</li>
-                <li><strong>Post-Surgical Rehab:</strong> Comprehensive post-operative care to ensure a smooth and successful recovery.</li>
+                <li><strong>In-Home Physiotherapy:</strong> Personalized treatment plans designed to meet your unique
+                    needs in the comfort of your home.</li>
+                <li><strong>Workplace Wellness:</strong> On-site physiotherapy and ergonomic assessments to keep you
+                    healthy and productive at work.</li>
+                <li><strong>Sports Rehabilitation:</strong> Specialized care for sports injuries to help you get back in
+                    the game faster.</li>
+                <li><strong>Post-Surgical Rehab:</strong> Comprehensive post-operative care to ensure a smooth and
+                    successful recovery.</li>
             </ul>
         </section>
+
         <section id="testimonials" class="testimonials">
             <h2>What Our Clients Say</h2>
-            <blockquote>
-                <img src="path/to/image1.jpg" alt="Sarah T." class="testimonial-img">
-                "Brivia provided exceptional care after my knee surgery. The convenience of in-home visits made my recovery so much easier. Highly recommend!" - Sarah T.
+            <!--<blockquote>
+                <img src="path/to/image1.jpg" alt="Testimonial from Sarah T." class="testimonial-img">
+                "Brivia provided exceptional care after my knee surgery. The convenience of in-home visits made my
+                recovery so much easier. Highly recommend!" - Sarah T.
             </blockquote>
             <blockquote>
-                <img src="path/to/image2.jpg" alt="Mark L." class="testimonial-img">
-                "Thanks to The Roaming Physio, I was able to get back to my sport faster than I thought possible. The personalized treatment plan was just what I needed." - Mark L.
-            </blockquote>
+                <img src="path/to/image2.jpg" alt="Testimonial from Mark L." class="testimonial-img">
+                "Thanks to The Roaming Physio, I was able to get back to my sport faster than I thought possible. The
+                personalized treatment plan was just what I needed." - Mark L.
+            </blockquote>-->
+            <div class="testimonial-list">
+                <!--Testimonials Are Added Here Dynamicaly-->
+
+            </div>
         </section>
-        <section id="blog" class="blog-preview">
+
+        <!--        <section id="blog" class="blog-preview">
             <h2>Latest from Our Blog</h2>
             <article>
                 <h3>5 Exercises to Improve Your Posture</h3>
-                <p><em>May 15, 2024</em> - Good posture is crucial for overall health. Here are five exercises to help you maintain a healthy posture... <a href="#">Read more</a></p>
+                <p><em>May 15, 2024</em> - Good posture is crucial for overall health. Here are five exercises to help
+                    you maintain a healthy posture... <a href="#">Read more</a></p>
             </article>
             <article>
                 <h3>How to Prevent Workplace Injuries</h3>
-                <p><em>May 22, 2024</em> - Workplace injuries are common but preventable. Follow these tips to create a safer work environment... <a href="#">Read more</a></p>
+                <p><em>May 22, 2024</em> - Workplace injuries are common but preventable. Follow these tips to create a
+                    safer work environment... <a href="#">Read more</a></p>
             </article>
+        </section> -->
+
+        <!-- In your HTML -->
+        <section id="blog" class="blog-preview">
+            <h2>Latest from Our Blog</h2>
+            <div class="blog-articles"></div>
+            <button class="load-more">Load More</button>
         </section>
+
     </div>
+
+    <!-- In the contact section of your HTML -->
+    <section id="contact" class="blog-preview">
+        <h2>Give Us Your Feedback</h2>
+        <form id="contact-form"
+            action="https://script.google.com/macros/s/AKfycbxrhCip6lJoyNPN5zExEhprtisD6KKpUOPXTWbtGVA6LqLzgX0mkp-PdtA8DiDxw54_/exec"
+            method="post">
+            <div class="label">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="label">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="label">
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" required></textarea>
+            </div>
+            <button type="submit">Send Message</button>
+        </form>
+    </section>
+
     <footer>
         <p>Contact Information:</p>
         <p>The Roaming Physio</p>
-        <p>Email: <a href="mailto:info@roamingphysio.com">info@roamingphysio.com</a></p>
-        <p>Phone: (123) 456-7890</p>
-        <p>Follow us on social media: 
-            <a href="#">Facebook</a> | 
-            <a href="#">Twitter</a> | 
+        <p>Email: <a href="briviallan@gmail.com">briviallan@gmail.com</a></p>
+        <p>Phone: (+254) 7481-67395</p>
+        <p>Follow us on social media:
+            <a href="#">Facebook</a> |
+            <a href="#">Twitter</a> |
             <a href="#">Instagram</a>
         </p>
         <p>
-            <a href="#">Home</a> | 
-            <a href="#">About</a> | 
-            <a href="#">Services</a> | 
-            <a href="#">Testimonials</a> | 
-            <a href="#">Blog</a> | 
-            <a href="#">Contact</a>
+            <a href="./index.html">Home</a> |
+            <a href="#about">About</a> |
+            <a href="#services">Services</a> |
+            <a href="#testimonials">Testimonials</a> |
+            <a href="#blog">Blog</a> |
+            <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio">Contact</a>
         </p>
-        <p><a href="#">Privacy Policy</a></p>
+        <p><a href="./Privacy.txt" target="_blank">Privacy Policy</a></p>
     </footer>
-    <script src="script.js"></script>
+    <div class="loader"></div>
+    <script src="index.js"></script>
+    <script src="blog.js"></script>
+    <script src="reviews.js"></script>
 </body>
 </html>
 
 
-
 // File: index.js
+window.onload = function () {
+    document.body.classList.remove('loading');
+};
+
 // JavaScript functionality can be added here
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Example: Scroll to section when navigation link is clicked
-    document.querySelectorAll('nav a').forEach(function(link) {
-        link.addEventListener('click', function(e) {
+    document.querySelectorAll('nav a').forEach(function (link) {
+        link.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = link.getAttribute('href').substring(1);
             const targetSection = document.getElementById(targetId);
@@ -109,12 +232,143 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Burger Menu Functionality
+    const burgerMenu = document.querySelector('.burger-menu');
+    const mobileNav = document.querySelector('.mobile-nav');
+    const closeBtn = document.querySelector('.close-btn');
+
+    burgerMenu.addEventListener('click', function () {
+        this.classList.toggle('change');
+        mobileNav.style.display = mobileNav.style.display === 'block' ? 'none' : 'block';
+    });
+
+    closeBtn.addEventListener('click', function() {
+        burgerMenu.classList.remove('change');
+        mobileNav.style.display = 'none';
+    });
+
+
+    // Close mobile nav when clicking outside the menu
+    window.addEventListener('click', function (e) {
+        if (!e.target.matches('.burger-menu') && !mobileNav.contains(e.target)) {
+            burgerMenu.classList.remove('change');
+            mobileNav.style.display = 'none';
+        }
+    });
+
+    // Contact form submission
+    const contactForm = document.getElementById('contact-form');
+    contactForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        // add code here to handle form submission
+        // send data to a server or display a success message
+        console.log('Form submitted!');
+        contactForm.reset();
+    });
 });
 
 
 
+// File: Privacy.txt
+Privacy Policy
+
+At The Roaming Physio, we value your privacy and are committed to protecting your personal information. This privacy policy outlines how we collect, use, and safeguard the information you provide to us through our website.
+
+Information Collection
+We may collect personal information such as your name and email address when you submit a form or inquiry through our website. We may also collect non-personal information like your IP address and browser type for analytical purposes.
+
+Use of Information
+The personal information we collect is used to respond to your inquiries, provide requested services, and communicate with you about our offerings. We may also use non-personal information for website analysis and improvement.
+
+Information Sharing and Disclosure
+We do not share or disclose your personal information with third parties, except when required by law or to provide requested services.
+
+Data Security
+We implement reasonable security measures to protect your personal information from unauthorized access, use, or disclosure.
+
+Third-Party Links and Services
+Our website may contain links to third-party websites or services. We are not responsible for the privacy practices of these external sites and encourage you to review their privacy policies.
+
+Children's Privacy
+Our website is not intended for children under the age of 13, and we do not knowingly collect personal information from children.
+
+Changes to Privacy Policy
+We may update this privacy policy from time to time. We encourage you to review this page regularly for any changes.
+
+Contact Us
+If you have any questions or concerns about our privacy practices, please contact us at [briviallan@gmail.com].
+
+
 // File: README.md
 # theroamingphysio.github.io
+
+
+
+// File: reviews.js
+const contactForm = document.getElementById('contact-form');
+const testimonialContainer = document.querySelector('.testimonials');
+
+function addTestimonial(name, message) {
+    const testimonialList = document.querySelector('.testimonial-list');
+    const newTestimonial = document.createElement('blockquote');
+    newTestimonial.innerHTML = `
+        <div class="testimonial-img"></div>
+        <div>
+            <p>${message}</p>
+            <p>- ${name}</p>
+        </div>
+    `;
+    testimonialList.appendChild(newTestimonial);
+}
+
+contactForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = {};
+    for (const [key, value] of formData.entries()) {
+        data[key] = value;
+    }
+
+    fetch(e.target.action, {
+        method: 'POST',
+        body: new URLSearchParams(data).toString(),
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        mode: 'cors'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            fetchTestimonials(); // Fetch and update testimonials after form submission
+            contactForm.reset();
+            alert('Thank you for your message!');
+        } else {
+            alert('An error occurred. Please try again later.');
+        }
+    })
+    .catch(error => {
+        alert('An error occurred. Please try again later.');
+        console.error('Error:', error);
+    });
+});
+
+function fetchTestimonials() {
+    fetch('YOUR_SCRIPT_URL') // URL of your Google Apps Script
+    .then(response => response.json())
+    .then(testimonials => {
+        const testimonialList = document.querySelector('.testimonial-list');
+        testimonialList.innerHTML = ''; // Clear current testimonials
+        testimonials.forEach(testimonial => {
+            addTestimonial(testimonial.name, testimonial.message);
+        });
+    })
+    .catch(error => console.error('Error fetching testimonials:', error));
+}
+
+// Fetch testimonials when the page loads
+document.addEventListener('DOMContentLoaded', fetchTestimonials);
 
 
 
@@ -125,22 +379,26 @@ body {
     padding: 0;
     background-color: #f4f4f4;
 }
+
 header {
     background: #581845;
     color: #fff;
     padding: 10px 0;
     text-align: center;
 }
+
 nav {
     text-align: center;
     background: #a45022;
     padding: 10px 0;
 }
+
 nav a {
     color: #fff;
     margin: 0 15px;
     text-decoration: none;
 }
+
 .hero {
     position: relative;
     background: url('./resources/images/Physiotherapy.jpg') no-repeat center center/cover;
@@ -152,25 +410,31 @@ nav a {
     align-items: center;
     text-align: center;
 }
+
 .hero .overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Adjust the opacity as needed */
+    background: rgba(0, 0, 0, 0.5);
+    /* Adjust the opacity as needed */
     z-index: 1;
 }
+
 .hero .hero-content {
     position: relative;
     z-index: 2;
 }
+
 .hero h1 {
     font-size: 3em;
 }
+
 .hero p {
     font-size: 1.5em;
 }
+
 .cta {
     background: #e8491d;
     color: #fff;
@@ -179,9 +443,11 @@ nav a {
     margin-top: 20px;
     display: inline-block;
 }
+
 .container {
     padding: 20px;
 }
+
 .container h2 {
     color: #333;
 }
@@ -200,24 +466,244 @@ nav a {
     height: 50px;
 }
 
-.services, .testimonials, .blog-preview {
+.services,
+.testimonials,
+.blog-preview {
     background: #fff;
     padding: 20px;
     margin: 20px 0;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
 footer {
     background: #333;
     color: #fff;
     text-align: center;
     padding: 10px 0;
 }
+
 footer a {
     color: #fff;
     margin: 0 10px;
     text-decoration: none;
 }
 
+/* For Preloader */
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+body:not(.loading) .loader {
+    display: none;
+}
+
+/* ---------------------------------------------------------- */
+
+/* For small screens */
+@media (max-width: 767px) {
+    .hero {
+        height: 300px;
+    }
+
+    .hero h1 {
+        font-size: 2em;
+    }
+
+    .hero p {
+        font-size: 1.2em;
+    }
+
+    .testimonials blockquote,
+    .blog-preview article {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .testimonials .testimonial-img,
+    .blog-preview .blog-img {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Burger Menu Styles */
+.burger-menu {
+    display: none;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.line1,
+.line2,
+.line3 {
+    width: 30px;
+    height: 3px;
+    background-color: #fff;
+    margin: 6px 0;
+    transition: 0.4s;
+    transform-origin: center;
+}
+
+/* Mobile Navigation Styles */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: fit-content;
+    background-color: #333;
+    padding: 20px;
+    z-index: 999;
+    overflow-y: auto;
+}
+
+.mobile-nav a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* ------------------------------------------------------------------ */
+
+/* Media Query for Smaller Screens */
+@media (max-width: 767px) {
+    nav {
+        display: none;
+    }
+
+    .burger-menu {
+        display: block;
+    }
+
+    /* Styles for the "X" icon */
+    .change .line1 {
+        transform: translate(0, 9px) rotate(45deg);
+    }
+
+    .change .line2 {
+        opacity: 0;
+    }
+
+    .change .line3 {
+        transform: translate(0, -9px) rotate(-45deg);
+    }
+}
+
+.testimonials blockquote {
+    margin: 10px, 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-left: 4px solid #333;
+}
+
+
+/* Contact form */
+/* Form styles */
+#contact-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/* Block Quote Container Styles For Dynamic Testimonials */
+/*********************************************************/
+.testimonials .testimonial-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.testimonials blockquote {
+    display: flex;
+    align-items: center;
+    max-width: 400px;
+    margin: 20px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.testimonials .testimonial-img {
+    width: 50px;
+    height: 50px;
+    margin-right: 20px;
+    background-image: url('human-icon.png');
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+}
 
 
