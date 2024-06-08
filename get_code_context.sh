@@ -12,7 +12,10 @@ if [ -f "$output_file" ]; then
 fi
 
 # List of file types to ignore
-ignore_files=("*.ico" "*.png" "*.jpg" "*.jpeg" "*.gif" "*.svg" "*.sh")
+ignore_files=("*.ico" "*.png" "*.jpg" "*.jpeg" "*.gif" "*.svg" "*.sh" "*.json")
+
+# Folder to ignore
+ignore_folder="node_modules"
 
 # Function to check if a file should be ignored
 should_ignore_file() {
@@ -29,16 +32,30 @@ should_ignore_file() {
 append_file_content() {
   local file=$1
   relative_path=${file#"$project_dir/"}
-  echo "// File: $relative_path" >> "$output_file"
-  cat "$file" >> "$output_file"
-  echo -e "\n\n" >> "$output_file"
+  # shellcheck disable=SC2129
+  echo "// File: $relative_path" >>"$output_file"
+  cat "$file" >>"$output_file"
+  echo -e "\n\n" >>"$output_file"
 }
 
-# Process all files in the root directory
-for file in "$project_dir"/*; do
-  if [ -f "$file" ]; then
-    if ! should_ignore_file "$file"; then
-      append_file_content "$file"
+# Recursive function to read files and append their content
+read_files() {
+  for entry in "$1"/*; do
+    if [ -d "$entry" ]; then
+      # Skip the directory if it is the one to be ignored
+      if [[ $(basename "$entry") == "$ignore_folder" ]]; then
+        continue
+      fi
+      # If entry is a directory, call this function recursively
+      read_files "$entry"
+    elif [ -f "$entry" ]; then
+      # Check if the file type should be ignored
+      if ! should_ignore_file "$entry"; then
+        append_file_content "$entry"
+      fi
     fi
-  fi
-done
+  done
+}
+
+# Start processing from the project directory
+read_files "$project_dir"

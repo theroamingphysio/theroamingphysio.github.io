@@ -1,6 +1,205 @@
-// File: blog.js
+// File: blog-admin/backend/server.js
+// backend/server.js
+
+const express = require('express');
+const multer = require('multer');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const path = require('path');
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
+
+app.post('/upload', upload.single('image'), (req, res) => {
+    if (req.file) {
+        res.json({ imageUrl: `/uploads/${req.file.filename}` });
+    } else {
+        res.status(400).json({ error: 'No file uploaded' });
+    }
+});
+
+app.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
+});
+
+
+
+// File: blog-admin/frontend/admin.css
+/* Admin styles specific to admin page */
+.container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+	display: block;
+	margin: 10px 0 5px;
+}
+
+form input, form textarea {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 20px;
+	border:1px solid #ccc;
+	border-radius: 5px;
+}
+
+form button {
+	padding: 10px;
+	background: #a45022;
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+form button:hover {
+	background: #581845;
+}
+
+
+
+// File: blog-admin/frontend/admin.html
+<!DOCTYPE html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Admin - Blog Post</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+	<header>
+		<h1>The Roaming Physio</h1>
+		<p>Admin Panel</p>
+		<div class="burger-menu">
+			<div class="line1"></div>
+			<div class="line2"></div>
+			<div class="line3"></div>
+		</div>
+		<nav class="mobile-nav">
+			<span class="close-btn">x </div></span>
+			<a href="index.html">Home</a>
+			<a href="admin.html">Admin</a>
+	</header>
+
+	<nav>
+		<a href="index.html">Home</a>
+		<a href="admin.html">Admin</a>
+	</nav>
+
+	<!--The Admin Section Code For The Blog Editior-->
+	<div class="container">
+		<h2>Create a New Blog Post</h2>
+		<form id="blog-form">
+			<label for="title">Title:</label>
+			<input type="text" id="title" name="title" required>
+
+			<label for="date">Date:</label>
+			<input type="date" name="date" id="date" required>
+
+			<label for="excerpt">Excerpt:</label>
+			<textarea id="excerpt" name="excerpt" required></textarea>
+
+			<label for="content">Content:</label>
+            <textarea id="content" name="content" required></textarea>
+
+			<label for="image" >Upload Feature Image :</label>
+			<input type="file" name="image" id="image" accept="image/*" reqired>
+			<button type="submit">Publish</button>
+		</form>
+	</div>
+
+	<footer>
+		<p>Contact Information:</p>
+		<p>The Roaming Physio</p>
+		<p>Email: <a href="briviallan@gmail.com">briviallan@gmail.com</a></p>
+		<p>Phone: (+254) 7481-67395</p>
+		<p>Follow us on social media:
+			<a href="#">Facebook</a> |
+			<a href="#">Twitter</a> |
+			<a href="#">Instagram</a>
+		</p>
+		<p>
+			<a href="./index.html">Home</a> |
+			<a href="#about">About</a> |
+			<a href="#services">Services</a> |
+			<a href="#testimonials">Testimonials</a> |
+			<a href="#blog">Blog</a> |
+			<a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio">Contact</a>
+		</p>
+		<p><a href="./Privacy.txt" target="_blank">Privacy Policy</a></p>
+	</footer>
+
+	<script src="./admin.js"></script>
+	<script src="./burger.js"></script>
+</body>
+</html>
+
+
+// File: blog-admin/frontend/admin.js
+// admin.js
+
+document.getElementById('blog-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    const imageFile = document.getElementById('image').files[0];
+    
+    formData.append('title', document.getElementById('title').value);
+    formData.append('date', document.getElementById('date').value);
+    formData.append('excerpt', document.getElementById('excerpt').value);
+    formData.append('content', document.getElementById('content').value);
+    formData.append('image', imageFile);
+
+    fetch('http://localhost:3000/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.imageUrl) {
+            const blogPost = {
+                title: document.getElementById('title').value,
+                date: document.getElementById('date').value,
+                excerpt: document.getElementById('excerpt').value,
+                content: document.getElementById('content').value,
+                image: data.imageUrl
+            };
+            let blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+            blogPosts.push(blogPost);
+            localStorage.setItem('blogPosts', JSON.stringify(blogPosts));
+            alert('Blog post published!');
+            this.reset();
+        } else {
+            alert('Image upload failed');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+
+
+// File: blog-admin/frontend/blog.js
 // In your script.js file
-const blogArticles = [
+/*const blogArticles = [
 	{
 		title: '5 Exercises to Improve Your Posture',
 		date: 'May 15, 2024',
@@ -13,36 +212,69 @@ const blogArticles = [
 		excerpt: 'Workplace injuries are common but preventable. Follow these tips to create a safer work environment...',
 		link: '#'
 	},
-	// Add more blog article objects here
-];
+	]; */
 
+	// Add more blog article objects here
+    // blog.js
 const blogContainer = document.querySelector('.blog-articles');
 const loadMoreButton = document.querySelector('.load-more');
 let currentIndex = 0;
 const articlesPerLoad = 2;
 
 function loadBlogArticles() {
-	const endIndex = currentIndex + articlesPerLoad;
-	for (let i = currentIndex; i < endIndex && i < blogArticles.length; i++) {
-		const article = blogArticles[i];
-		const articleElement = document.createElement('article');
-		articleElement.innerHTML = `
-		<h3>${article.title}</h3>
-		<p><em>${article.date}</em> - ${article.excerpt} <a href="${article.link}">Read more</a></p>`;
-		blogContainer.appendChild(articleElement);
-	}
-	currentIndex = endIndex;
-	if (currentIndex >= blogArticles.length) {
-		loadMoreButton.style.display = 'none';
-	}
+    let blogArticles = JSON.parse(localStorage.getItem('blogPosts')) || [];
+    if (!blogArticles.length) {
+        blogContainer.innerHTML = '<p>No blog posts available.</p>';
+        loadMoreButton.style.display = 'none';
+        return;
+    }
+    const endIndex = currentIndex + articlesPerLoad;
+    for (let i = currentIndex; i < endIndex && i < blogArticles.length; i++) {
+        const article = blogArticles[i];
+        const articleElement = document.createElement('article');
+        articleElement.innerHTML = `
+            <h3>${article.title}</h3>
+            <p><em>${article.date}</em> - ${article.excerpt} <a href="#">Read more</a></p>
+            <img class="blog-image" src="/blog-admin/backend${article.image}" alt="${article.title}">
+        `;
+        blogContainer.appendChild(articleElement);
+    }
+    currentIndex = endIndex;
+    if (currentIndex >= blogArticles.length) {
+        loadMoreButton.style.display = 'none';
+    }
 }
 
-loadBlogArticles();
-
+document.addEventListener('DOMContentLoaded', loadBlogArticles);
 loadMoreButton.addEventListener('click', loadBlogArticles);
 
+console.log(localStorage.getItem('blogPosts'));
 
-// File: index.html
+
+// File: blog-admin/frontend/burger.js
+// Burger Menu Functionality
+const burgerMenu = document.querySelector('.burger-menu');
+const mobileNav = document.querySelector('.mobile-nav');
+const closeBtn = document.querySelector('.close-btn');
+burgerMenu.addEventListener('click', function () {
+    this.classList.toggle('change');
+    mobileNav.style.display = mobileNav.style.display === 'block' ? 'none' : 'block';
+});
+closeBtn.addEventListener('click', function() {
+    burgerMenu.classList.remove('change');
+    mobileNav.style.display = 'none';
+});
+// Close mobile nav when clicking outside the menu
+window.addEventListener('click', function (e) {
+    if (!e.target.matches('.burger-menu') && !mobileNav.contains(e.target)) {
+        burgerMenu.classList.remove('change');
+        mobileNav.style.display = 'none';
+    }
+});
+
+
+
+// File: blog-admin/frontend/index.html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -120,16 +352,16 @@ loadMoreButton.addEventListener('click', loadBlogArticles);
 
         <section id="testimonials" class="testimonials">
             <h2>What Our Clients Say</h2>
-            <!--<blockquote>
-                <img src="path/to/image1.jpg" alt="Testimonial from Sarah T." class="testimonial-img">
+            <blockquote>
+                <img src="./resources/images/human-icon.png" alt="Testimonial from Sarah T." class="testimonial-img">
                 "Brivia provided exceptional care after my knee surgery. The convenience of in-home visits made my
                 recovery so much easier. Highly recommend!" - Sarah T.
             </blockquote>
             <blockquote>
-                <img src="path/to/image2.jpg" alt="Testimonial from Mark L." class="testimonial-img">
+                <img src="./resources/images/human-icon.png" alt="Testimonial from Mark L." class="testimonial-img">
                 "Thanks to The Roaming Physio, I was able to get back to my sport faster than I thought possible. The
                 personalized treatment plan was just what I needed." - Mark L.
-            </blockquote>-->
+            </blockquote>
             <div class="testimonial-list">
                 <!--Testimonials Are Added Here Dynamicaly-->
 
@@ -204,14 +436,16 @@ loadMoreButton.addEventListener('click', loadBlogArticles);
         <p><a href="./Privacy.txt" target="_blank">Privacy Policy</a></p>
     </footer>
     <div class="loader"></div>
-    <script src="index.js"></script>
-    <script src="blog.js"></script>
-    <script src="reviews.js"></script>
+    <script src="./index.js"></script>
+    <script src="./blog.js"></script>
+    <script src="./reviews.js"></script>
+    <script src="./burger.js"></script>
 </body>
 </html>
 
 
-// File: index.js
+
+// File: blog-admin/frontend/index.js
 window.onload = function () {
     document.body.classList.remove('loading');
 };
@@ -233,30 +467,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Burger Menu Functionality
-    const burgerMenu = document.querySelector('.burger-menu');
-    const mobileNav = document.querySelector('.mobile-nav');
-    const closeBtn = document.querySelector('.close-btn');
-
-    burgerMenu.addEventListener('click', function () {
-        this.classList.toggle('change');
-        mobileNav.style.display = mobileNav.style.display === 'block' ? 'none' : 'block';
-    });
-
-    closeBtn.addEventListener('click', function() {
-        burgerMenu.classList.remove('change');
-        mobileNav.style.display = 'none';
-    });
-
-
-    // Close mobile nav when clicking outside the menu
-    window.addEventListener('click', function (e) {
-        if (!e.target.matches('.burger-menu') && !mobileNav.contains(e.target)) {
-            burgerMenu.classList.remove('change');
-            mobileNav.style.display = 'none';
-        }
-    });
-
     // Contact form submission
     const contactForm = document.getElementById('contact-form');
     contactForm.addEventListener('submit', function (e) {
@@ -270,7 +480,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-// File: Privacy.txt
+// File: blog-admin/frontend/Privacy.txt
 Privacy Policy
 
 At The Roaming Physio, we value your privacy and are committed to protecting your personal information. This privacy policy outlines how we collect, use, and safeguard the information you provide to us through our website.
@@ -300,12 +510,7 @@ Contact Us
 If you have any questions or concerns about our privacy practices, please contact us at [briviallan@gmail.com].
 
 
-// File: README.md
-# theroamingphysio.github.io
-
-
-
-// File: reviews.js
+// File: blog-admin/frontend/reviews.js
 const contactForm = document.getElementById('contact-form');
 const testimonialContainer = document.querySelector('.testimonials');
 
@@ -355,7 +560,7 @@ contactForm.addEventListener('submit', function (e) {
 });
 
 function fetchTestimonials() {
-    fetch('YOUR_SCRIPT_URL') // URL of your Google Apps Script
+    fetch('https://script.google.com/macros/s/AKfycbxrhCip6lJoyNPN5zExEhprtisD6KKpUOPXTWbtGVA6LqLzgX0mkp-PdtA8DiDxw54_/exec') // URL of your Google Apps Script
     .then(response => response.json())
     .then(testimonials => {
         const testimonialList = document.querySelector('.testimonial-list');
@@ -372,7 +577,7 @@ document.addEventListener('DOMContentLoaded', fetchTestimonials);
 
 
 
-// File: style.css
+// File: blog-admin/frontend/style.css
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -541,7 +746,7 @@ body:not(.loading) .loader {
     }
 
     .testimonials .testimonial-img,
-    .blog-preview .blog-img {
+    .blog-preview {
         margin-right: 0;
         margin-bottom: 1rem;
     }
@@ -705,5 +910,20 @@ button[type="submit"]:hover {
     background-position: center;
     border-radius: 50%;
 }
+
+
+// File: README.md
+# The Roaming Physio Web Page
+
+***Project Structure***
+
+blog-admin/backend:
+node_modules/  package-lock.json  uploads/
+package.json   server.js
+
+blog-admin/frontend:
+admin.css   blog.js     index.js     reviews.js
+admin.html  burger.js   Privacy.txt  style.css
+admin.js    index.html  resources/
 
 
