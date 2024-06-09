@@ -1,15 +1,55 @@
-// File: blog-admin/backend/server.js
-// backend/server.js
+// File: blog-admin/backend/auth.js
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 
+dotenv.config();
+
+const router = express.Router();
+
+// Mock user for demonstration
+const mockUser = {
+    username: 'testuser',
+    passwordHash: bcrypt.hashSync('testpassword', 10), // Hash the password for storage
+};
+
+// Login Route
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    
+    if (username !== mockUser.username) {
+        return res.status(401).json({ message: 'Invalid username' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, mockUser.passwordHash);
+    if (!isPasswordValid) {
+        return res.status(401).json({ message: 'Invalid password' });
+    }
+
+    const token = jwt.sign({ username: mockUser.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
+});
+
+module.exports = router;
+
+
+
+// File: blog-admin/backend/server.js
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const { authenticate } = require('./auth');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use('/api', authRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const storage = multer.diskStorage({
@@ -31,9 +71,26 @@ app.post('/upload', upload.single('image'), (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000');
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    console.log('Received login attempt:', username, password);
+
+    try {
+        const authResult = await authenticate(username, password);
+
+        if (authResult.success) {
+            res.json({ message: authResult.message, token: authResult.token });
+        } else {
+            res.status(401).json({ message: authResult.message });
+        }
+    } catch (error) {
+        console.error('Error during authentication:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 
 
@@ -233,9 +290,13 @@ function loadBlogArticles() {
         const article = blogArticles[i];
         const articleElement = document.createElement('article');
         articleElement.innerHTML = `
+        <div class="blog-preview-container">
+        <img class="blog-image" src="/blog-admin/backend${article.image}" alt="${article.title}">
+        <div class="blog-preview-content">
             <h3>${article.title}</h3>
             <p><em>${article.date}</em> - ${article.excerpt} <a href="#">Read more</a></p>
-            <img class="blog-image" src="/blog-admin/backend${article.image}" alt="${article.title}">
+        </div>
+    </div>
         `;
         blogContainer.appendChild(articleElement);
     }
@@ -299,6 +360,7 @@ window.addEventListener('click', function (e) {
         </div>
         <nav class="mobile-nav">
             <span class="close-btn">x </div></span>
+            <a href="./login.html">Login</a>
             <a href="#">Home</a>
             <a href="#about">About</a>
             <a href="#services">Services</a>
@@ -309,6 +371,7 @@ window.addEventListener('click', function (e) {
     </header>
 
     <nav>
+        <a href="./login.html">Login</a>
         <a href="#">Home</a>
         <a href="#about">About</a>
         <a href="#services">Services</a>
@@ -478,6 +541,122 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+
+
+// File: blog-admin/frontend/Login.html
+<!DOCTYPE html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Admin - login</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="admin.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+	<header>
+		<h1>The Roaming Physio</h1>
+		<p>Admin Login</p>
+		<div class="burger-menu">
+			<div class="line1"></div>
+			<div class="line2"></div>
+			<div class="line3"></div>
+		</div>
+		<nav class="mobile-nav">
+			<span class="close-btn">x </div></span>
+			<a href="index.html">Home</a>
+	</header>
+
+	<nav>
+		<a href="index.html">Home</a>
+	</nav>
+
+	<!--Login Form For The Admin Portal-->
+	<section id="contact" class="blog-preview">
+		<h2>Log in</h2>
+		<form id="loginForm" action="#">
+			<div class="label">
+				<label for="username">Username:</label>
+				<input type="text" id="username" name="username" autocomplete="username" required>
+			</div>
+			<div class="password-container">
+				<label for="password">Password:</label>
+				<input type="password" id="password" name="password" autocomplete="current-password" required>
+				<i class="far fa-eye eye-icon" id="togglePassword"></i>
+			</div>
+			<button type="submit">login</button>
+		</form>
+	</section>
+
+	<footer>
+		<p>Contact Information:</p>
+		<p>The Roaming Physio</p>
+		<p>Email: <a href="briviallan@gmail.com">briviallan@gmail.com</a></p>
+		<p>Phone: (+254) 7481-67395</p>
+		<p>Follow us on social media:
+			<a href="#">Facebook</a> |
+			<a href="#">Twitter</a> |
+			<a href="#">Instagram</a>
+		</p>
+		<p>
+			<a href="./index.html">Home</a> |
+			<a href="#about">About</a> |
+			<a href="#services">Services</a> |
+			<a href="#testimonials">Testimonials</a> |
+			<a href="#blog">Blog</a> |
+			<a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio">Contact</a>
+		</p>
+		<p><a href="./Privacy.txt" target="_blank">Privacy Policy</a></p>
+	</footer>
+
+	<script src="./login.js"></script>
+	<script src="./burger.js"></script>
+</body>
+</html>
+
+
+// File: blog-admin/frontend/login.js
+document.getElementById('loginForm').addEventListener('submit', async (event) => {
+	event.preventDefault();
+
+	const username = document.getElementById('username').value;
+	const password = document.getElementById('password').value;
+
+	try {
+		const response = await fetch('http://localhost:3000/api/login', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ username, password })
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json();
+			throw new Error(errorData.message || 'Network response was not ok');
+		}
+
+		const data = await response.json();
+		console.log('Login successful:', data);
+		// Handle successful login
+	} catch (error) {
+		console.error('Error during login:', error.message);
+		/* Display user Error */
+		alert(error.message);
+	}
+});
+
+/* Hide and Unhide password */
+const togglePassword = document.getElementById('togglePassword');
+const passwordInput = document.getElementById('password');
+
+togglePassword.addEventListener('click', function () {
+	// Toggle the type attribute
+	const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+	passwordInput.setAttribute('type', type);
+	// Toggle the eye slash icon
+	this.classList.toggle('fa-eye-slash');
+});
 
 
 // File: blog-admin/frontend/Privacy.txt
@@ -838,7 +1017,7 @@ body:not(.loading) .loader {
 
 /* Contact form */
 /* Form styles */
-#contact-form {
+#contact-form, #loginForm{
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
@@ -911,19 +1090,101 @@ button[type="submit"]:hover {
     border-radius: 50%;
 }
 
+/* Blog Articles */
+.blog-preview {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-// File: README.md
-# The Roaming Physio Web Page
+.blog-articles {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
 
-***Project Structure***
+.blog-preview-container {
+    flex: 0 0 300px; /* Adjust the width as needed */
+    scroll-snap-align: start;
+    margin-right: 20px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+}
 
-blog-admin/backend:
-node_modules/  package-lock.json  uploads/
-package.json   server.js
+.blog-preview-container:last-child {
+    margin-right: 0;
+}
 
-blog-admin/frontend:
-admin.css   blog.js     index.js     reviews.js
-admin.html  burger.js   Privacy.txt  style.css
-admin.js    index.html  resources/
+.blog-image {
+    width: 100%;
+    height: 200px; /* Adjust the height as needed */
+    object-fit: cover;
+    filter: brightness(0.7); /* Darken the image */
+}
+
+.blog-preview-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%);
+    color: #fff;
+}
+
+.blog-preview-content h3 {
+    margin-top: 0;
+}
+
+.blog-preview-content a {
+    color: black;
+    text-decoration: none;
+}
+
+.blog-preview-content a:hover {
+    text-decoration: underline;
+}
+
+/* Smaller screens in Blog rtcle preview */
+@media (max-width: 767px) {
+    .blog-preview {
+        padding: 10px;
+    }
+
+    .blog-articles {
+        flex-direction: column;
+        overflow-x: unset;
+    }
+
+    .blog-preview-container {
+        flex: 0 0 auto;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .blog-image {
+        height: 150px;
+    }
+
+    .blog-preview-content {
+        position: static;
+        background: none;
+        padding: 10px;
+        color: #333;
+    }
+}
+
+/* The eye on the Login Password box */
+.password-container .eye-icon {
+    position: relative;
+    right: -95%;
+    bottom: 47px;
+    cursor: pointer;
+
+}
 
 

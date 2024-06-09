@@ -258,7 +258,7 @@ body:not(.loading) .loader {
 
 /* Contact form */
 /* Form styles */
-#contact-form {
+#contact-form, #loginForm{
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
@@ -417,4 +417,13 @@ button[type="submit"]:hover {
         padding: 10px;
         color: #333;
     }
+}
+
+/* The eye on the Login Password box */
+.password-container .eye-icon {
+    position: relative;
+    right: -95%;
+    bottom: 47px;
+    cursor: pointer;
+
 }

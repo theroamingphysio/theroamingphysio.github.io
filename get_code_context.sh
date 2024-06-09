@@ -12,7 +12,7 @@ if [ -f "$output_file" ]; then
 fi
 
 # List of file types to ignore
-ignore_files=("*.ico" "*.png" "*.jpg" "*.jpeg" "*.gif" "*.svg" "*.sh" "*.json")
+ignore_files=("*.ico" "*.png" "*.jpg" "*.jpeg" "*.gif" "*.svg" "*.sh" "*.json" "*.md")
 
 # Folder to ignore
 ignore_folder="node_modules"
