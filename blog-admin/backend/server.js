@@ -52,4 +52,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const IP_ADDRESS = process.env.IP_ADDRESS || '0.0.0.0';
+app.listen(PORT,IP_ADDRESS, () => {
+    console.log(`Server running on http://${IP_ADDRESS}:${PORT}`)
+});
