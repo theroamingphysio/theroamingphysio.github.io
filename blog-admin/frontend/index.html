@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="The Roaming Physio - Bringing Expert Physiotherapy to Your Doorstep. Personalized care, wherever you are.">
+    <title>The Roaming Physio</title>
+    <link rel="icon" type="image/png" href="path/to/your/favicon.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="loaging">
+    <header>
+        <h1>The Roaming Physio</h1>
+        <p>"Bringing Expert Physiotherapy to Your Doorstep"</p>
+        <div class="burger-menu">
+            <div class="line1"></div>
+            <div class="line2"></div>
+            <div class="line3"></div>
+        </div>
+        <nav class="mobile-nav">
+            <span class="close-btn">x </div></span>
+            <a href="./login.html" target="_blank">Login</a>
+            <a href="#">Home</a>
+            <a href="#about">About</a>
+            <a href="#services">Services</a>
+            <a href="#testimonials">Testimonials</a>
+            <a href="#blog">Blog</a>
+            <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio" target="_blank">Contact</a>
+        </nav>
+    </header>
+
+    <nav>
+        <a href="./login.html" target="_blank">Login</a>
+        <a href="#">Home</a>
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#testimonials">Testimonials</a>
+        <a href="#blog">Blog</a>
+        <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio" target="_blank">Contact</a>
+    </nav>
+
+    <section class="hero">
+        <div class="overlay"></div>
+        <div class="hero-content">
+            <h1>Professional Physiotherapy at Your Convenience</h1>
+            <p>Personalized care, wherever you are.</p>
+            <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio" target="_blank" class="cta">Book an
+                Appointment</a>
+        </div>
+    </section>
+
+    <div class="container">
+        <section id="about">
+            <h2>Welcome to The Roaming Physio</h2>
+            <p>At The Roaming Physio, we believe in delivering top-notch physiotherapy services directly to your
+                location. Whether you need treatment at home, work, or elsewhere, our expert physiotherapist, Brivia, is
+                here to help. We specialize in personalized care tailored to your specific needs, ensuring you get the
+                best treatment without the hassle of travel.</p>
+        </section>
+
+        <section id="services" class="services">
+            <h2>Our Services</h2>
+            <ul>
+                <li><strong>In-Home Physiotherapy:</strong> Personalized treatment plans designed to meet your unique
+                    needs in the comfort of your home.</li>
+                <li><strong>Workplace Wellness:</strong> On-site physiotherapy and ergonomic assessments to keep you
+                    healthy and productive at work.</li>
+                <li><strong>Sports Rehabilitation:</strong> Specialized care for sports injuries to help you get back in
+                    the game faster.</li>
+                <li><strong>Post-Surgical Rehab:</strong> Comprehensive post-operative care to ensure a smooth and
+                    successful recovery.</li>
+            </ul>
+        </section>
+
+        <section id="testimonials" class="testimonials">
+            <h2>What Our Clients Say</h2>
+            <blockquote>
+                <img src="./resources/images/human-icon.png" alt="Testimonial from Sarah T." class="testimonial-img">
+                "Brivia provided exceptional care after my knee surgery. The convenience of in-home visits made my
+                recovery so much easier. Highly recommend!" - Sarah T.
+            </blockquote>
+            <blockquote>
+                <img src="./resources/images/human-icon.png" alt="Testimonial from Mark L." class="testimonial-img">
+                "Thanks to The Roaming Physio, I was able to get back to my sport faster than I thought possible. The
+                personalized treatment plan was just what I needed." - Mark L.
+            </blockquote>
+            <div class="testimonial-list">
+                <!--Testimonials Are Added Here Dynamicaly-->
+
+            </div>
+        </section>
+
+        <!--        <section id="blog" class="blog-preview">
+            <h2>Latest from Our Blog</h2>
+            <article>
+                <h3>5 Exercises to Improve Your Posture</h3>
+                <p><em>May 15, 2024</em> - Good posture is crucial for overall health. Here are five exercises to help
+                    you maintain a healthy posture... <a href="#">Read more</a></p>
+            </article>
+            <article>
+                <h3>How to Prevent Workplace Injuries</h3>
+                <p><em>May 22, 2024</em> - Workplace injuries are common but preventable. Follow these tips to create a
+                    safer work environment... <a href="#">Read more</a></p>
+            </article>
+        </section> -->
+
+        <!-- In your HTML -->
+        <section id="blog" class="blog-preview">
+            <h2>Latest from Our Blog</h2>
+            <div class="blog-articles"></div>
+            <button class="load-more">Load More</button>
+        </section>
+
+    </div>
+
+    <!-- In the contact section of your HTML -->
+    <section id="contact" class="blog-preview">
+        <h2>Give Us Your Feedback</h2>
+        <form id="contact-form"
+            action="https://script.google.com/macros/s/AKfycbxrhCip6lJoyNPN5zExEhprtisD6KKpUOPXTWbtGVA6LqLzgX0mkp-PdtA8DiDxw54_/exec"
+            method="post">
+            <div class="label">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="label">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="label">
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" required></textarea>
+            </div>
+            <button type="submit">Send Message</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>Contact Information:</p>
+        <p>The Roaming Physio</p>
+        <p>Email: <a href="briviallan@gmail.com">briviallan@gmail.com</a></p>
+        <p>Phone: (+254) 7481-67395</p>
+        <p>Follow us on social media:
+            <a href="#">Facebook</a> |
+            <a href="#">Twitter</a> |
+            <a href="#">Instagram</a>
+        </p>
+        <p>
+            <a href="./index.html">Home</a> |
+            <a href="#about">About</a> |
+            <a href="#services">Services</a> |
+            <a href="#testimonials">Testimonials</a> |
+            <a href="#blog">Blog</a> |
+            <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio">Contact</a>
+        </p>
+        <p><a href="./Privacy.txt" target="_blank">Privacy Policy</a></p>
+    </footer>
+    <div class="loader"></div>
+    <script src="./index.js"></script>
+    <script src="./blog.js"></script>
+    <script src="./reviews.js"></script>
+    <script src="./burger.js"></script>
+</body>
+</html>

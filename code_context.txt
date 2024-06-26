@@ -1,6 +1,265 @@
-// File: blog.js
+// File: blog-admin/backend/auth.js
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const router = express.Router();
+
+// Mock user for demonstration
+const mockUser = {
+    username: 'testuser',
+    passwordHash: bcrypt.hashSync('testpassword', 10), // Hash the password for storage
+};
+
+// Login Route
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    
+    if (username !== mockUser.username) {
+        return res.status(401).json({ message: 'Invalid username' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, mockUser.passwordHash);
+    if (!isPasswordValid) {
+        return res.status(401).json({ message: 'Invalid password' });
+    }
+
+    const token = jwt.sign({ username: mockUser.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
+});
+
+module.exports = router;
+
+
+
+// File: blog-admin/backend/server.js
+const express = require('express');
+const multer = require('multer');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const path = require('path');
+const authRoutes = require('./auth'); // Import auth routes
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+app.use('/api', authRoutes); // Use auth routes
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
+
+app.post('/upload', upload.single('image'), (req, res) => {
+    if (req.file) {
+        res.json({ imageUrl: `/uploads/${req.file.filename}` });
+    } else {
+        res.status(400).json({ error: 'No file uploaded' });
+    }
+});
+
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    console.log('Received login attempt:', username, password);
+
+    try {
+        const authResult = await authenticate(username, password);
+
+        if (authResult.success) {
+            res.json({ message: authResult.message, token: authResult.token });
+        } else {
+            res.status(401).json({ message: authResult.message });
+        }
+    } catch (error) {
+        console.error('Error during authentication:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+const IP_ADDRESS = process.env.IP_ADDRESS || '0.0.0.0';
+app.listen(PORT,IP_ADDRESS, () => {
+    console.log(`Server running on http://${IP_ADDRESS}:${PORT}`)
+});
+
+
+
+// File: blog-admin/frontend/admin.css
+/* Admin styles specific to admin page */
+.container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+	display: block;
+	margin: 10px 0 5px;
+}
+
+form input, form textarea {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 20px;
+	border:1px solid #ccc;
+	border-radius: 5px;
+}
+
+form button {
+	padding: 10px;
+	background: #a45022;
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+form button:hover {
+	background: #581845;
+}
+
+
+
+// File: blog-admin/frontend/admin.html
+<!DOCTYPE html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Admin - Blog Post</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+	<header>
+		<h1>The Roaming Physio</h1>
+		<p>Admin Panel</p>
+		<div class="burger-menu">
+			<div class="line1"></div>
+			<div class="line2"></div>
+			<div class="line3"></div>
+		</div>
+		<nav class="mobile-nav">
+			<span class="close-btn">x </div></span>
+			<a href="index.html">Home</a>
+			<a href="admin.html">Admin</a>
+	</header>
+
+	<nav>
+		<a href="index.html">Home</a>
+		<a href="admin.html">Admin</a>
+	</nav>
+
+	<!--The Admin Section Code For The Blog Editior-->
+	<div class="container">
+		<h2>Create a New Blog Post</h2>
+		<form id="blog-form">
+			<label for="title">Title:</label>
+			<input type="text" id="title" name="title" required>
+
+			<label for="date">Date:</label>
+			<input type="date" name="date" id="date" required>
+
+			<label for="excerpt">Excerpt:</label>
+			<textarea id="excerpt" name="excerpt" required></textarea>
+
+			<label for="content">Content:</label>
+            <textarea id="content" name="content" required></textarea>
+
+			<label for="image" >Upload Feature Image :</label>
+			<input type="file" name="image" id="image" accept="image/*" reqired>
+			<button type="submit">Publish</button>
+		</form>
+	</div>
+
+	<footer>
+		<p>Contact Information:</p>
+		<p>The Roaming Physio</p>
+		<p>Email: <a href="briviallan@gmail.com">briviallan@gmail.com</a></p>
+		<p>Phone: (+254) 7481-67395</p>
+		<p>Follow us on social media:
+			<a href="#">Facebook</a> |
+			<a href="#">Twitter</a> |
+			<a href="#">Instagram</a>
+		</p>
+		<p>
+			<a href="./index.html">Home</a> |
+			<a href="#about">About</a> |
+			<a href="#services">Services</a> |
+			<a href="#testimonials">Testimonials</a> |
+			<a href="#blog">Blog</a> |
+			<a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio">Contact</a>
+		</p>
+		<p><a href="./Privacy.txt" target="_blank">Privacy Policy</a></p>
+	</footer>
+
+	<script src="./admin.js"></script>
+	<script src="./burger.js"></script>
+</body>
+</html>
+
+
+// File: blog-admin/frontend/admin.js
+// admin.js
+
+document.getElementById('blog-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    const imageFile = document.getElementById('image').files[0];
+    
+    formData.append('title', document.getElementById('title').value);
+    formData.append('date', document.getElementById('date').value);
+    formData.append('excerpt', document.getElementById('excerpt').value);
+    formData.append('content', document.getElementById('content').value);
+    formData.append('image', imageFile);
+
+    fetch('http://localhost:3000/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.imageUrl) {
+            const blogPost = {
+                title: document.getElementById('title').value,
+                date: document.getElementById('date').value,
+                excerpt: document.getElementById('excerpt').value,
+                content: document.getElementById('content').value,
+                image: data.imageUrl
+            };
+            let blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+            blogPosts.push(blogPost);
+            localStorage.setItem('blogPosts', JSON.stringify(blogPosts));
+            alert('Blog post published!');
+            this.reset();
+        } else {
+            alert('Image upload failed');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+
+
+// File: blog-admin/frontend/blog.js
 // In your script.js file
-const blogArticles = [
+/*const blogArticles = [
 	{
 		title: '5 Exercises to Improve Your Posture',
 		date: 'May 15, 2024',
@@ -13,36 +272,73 @@ const blogArticles = [
 		excerpt: 'Workplace injuries are common but preventable. Follow these tips to create a safer work environment...',
 		link: '#'
 	},
-	// Add more blog article objects here
-];
+	]; */
 
+	// Add more blog article objects here
+    // blog.js
 const blogContainer = document.querySelector('.blog-articles');
 const loadMoreButton = document.querySelector('.load-more');
 let currentIndex = 0;
 const articlesPerLoad = 2;
 
 function loadBlogArticles() {
-	const endIndex = currentIndex + articlesPerLoad;
-	for (let i = currentIndex; i < endIndex && i < blogArticles.length; i++) {
-		const article = blogArticles[i];
-		const articleElement = document.createElement('article');
-		articleElement.innerHTML = `
-		<h3>${article.title}</h3>
-		<p><em>${article.date}</em> - ${article.excerpt} <a href="${article.link}">Read more</a></p>`;
-		blogContainer.appendChild(articleElement);
-	}
-	currentIndex = endIndex;
-	if (currentIndex >= blogArticles.length) {
-		loadMoreButton.style.display = 'none';
-	}
+    let blogArticles = JSON.parse(localStorage.getItem('blogPosts')) || [];
+    if (!blogArticles.length) {
+        blogContainer.innerHTML = '<p>No blog posts available.</p>';
+        loadMoreButton.style.display = 'none';
+        return;
+    }
+    const endIndex = currentIndex + articlesPerLoad;
+    for (let i = currentIndex; i < endIndex && i < blogArticles.length; i++) {
+        const article = blogArticles[i];
+        const articleElement = document.createElement('article');
+        articleElement.innerHTML = `
+        <div class="blog-preview-container">
+        <img class="blog-image" src="/blog-admin/backend${article.image}" alt="${article.title}">
+        <div class="blog-preview-content">
+            <h3>${article.title}</h3>
+            <p><em>${article.date}</em> - ${article.excerpt} <a href="#">Read more</a></p>
+        </div>
+    </div>
+        `;
+        blogContainer.appendChild(articleElement);
+    }
+    currentIndex = endIndex;
+    if (currentIndex >= blogArticles.length) {
+        loadMoreButton.style.display = 'none';
+    }
 }
 
-loadBlogArticles();
-
+document.addEventListener('DOMContentLoaded', loadBlogArticles);
 loadMoreButton.addEventListener('click', loadBlogArticles);
 
+console.log(localStorage.getItem('blogPosts'));
 
-// File: index.html
+
+// File: blog-admin/frontend/burger.js
+// Burger Menu Functionality
+const burgerMenu = document.querySelector('.burger-menu');
+const mobileNav = document.querySelector('.mobile-nav');
+const closeBtn = document.querySelector('.close-btn');
+burgerMenu.addEventListener('click', function () {
+    this.classList.toggle('change');
+    mobileNav.style.display = mobileNav.style.display === 'block' ? 'none' : 'block';
+});
+closeBtn.addEventListener('click', function() {
+    burgerMenu.classList.remove('change');
+    mobileNav.style.display = 'none';
+});
+// Close mobile nav when clicking outside the menu
+window.addEventListener('click', function (e) {
+    if (!e.target.matches('.burger-menu') && !mobileNav.contains(e.target)) {
+        burgerMenu.classList.remove('change');
+        mobileNav.style.display = 'none';
+    }
+});
+
+
+
+// File: blog-admin/frontend/index.html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -67,6 +363,7 @@ loadMoreButton.addEventListener('click', loadBlogArticles);
         </div>
         <nav class="mobile-nav">
             <span class="close-btn">x </div></span>
+            <a href="./login.html" target="_blank">Login</a>
             <a href="#">Home</a>
             <a href="#about">About</a>
             <a href="#services">Services</a>
@@ -77,6 +374,7 @@ loadMoreButton.addEventListener('click', loadBlogArticles);
     </header>
 
     <nav>
+        <a href="./login.html" target="_blank">Login</a>
         <a href="#">Home</a>
         <a href="#about">About</a>
         <a href="#services">Services</a>
@@ -120,16 +418,16 @@ loadMoreButton.addEventListener('click', loadBlogArticles);
 
         <section id="testimonials" class="testimonials">
             <h2>What Our Clients Say</h2>
-            <!--<blockquote>
-                <img src="path/to/image1.jpg" alt="Testimonial from Sarah T." class="testimonial-img">
+            <blockquote>
+                <img src="./resources/images/human-icon.png" alt="Testimonial from Sarah T." class="testimonial-img">
                 "Brivia provided exceptional care after my knee surgery. The convenience of in-home visits made my
                 recovery so much easier. Highly recommend!" - Sarah T.
             </blockquote>
             <blockquote>
-                <img src="path/to/image2.jpg" alt="Testimonial from Mark L." class="testimonial-img">
+                <img src="./resources/images/human-icon.png" alt="Testimonial from Mark L." class="testimonial-img">
                 "Thanks to The Roaming Physio, I was able to get back to my sport faster than I thought possible. The
                 personalized treatment plan was just what I needed." - Mark L.
-            </blockquote>-->
+            </blockquote>
             <div class="testimonial-list">
                 <!--Testimonials Are Added Here Dynamicaly-->
 
@@ -204,14 +502,16 @@ loadMoreButton.addEventListener('click', loadBlogArticles);
         <p><a href="./Privacy.txt" target="_blank">Privacy Policy</a></p>
     </footer>
     <div class="loader"></div>
-    <script src="index.js"></script>
-    <script src="blog.js"></script>
-    <script src="reviews.js"></script>
+    <script src="./index.js"></script>
+    <script src="./blog.js"></script>
+    <script src="./reviews.js"></script>
+    <script src="./burger.js"></script>
 </body>
 </html>
 
 
-// File: index.js
+
+// File: blog-admin/frontend/index.js
 window.onload = function () {
     document.body.classList.remove('loading');
 };
@@ -233,30 +533,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Burger Menu Functionality
-    const burgerMenu = document.querySelector('.burger-menu');
-    const mobileNav = document.querySelector('.mobile-nav');
-    const closeBtn = document.querySelector('.close-btn');
-
-    burgerMenu.addEventListener('click', function () {
-        this.classList.toggle('change');
-        mobileNav.style.display = mobileNav.style.display === 'block' ? 'none' : 'block';
-    });
-
-    closeBtn.addEventListener('click', function() {
-        burgerMenu.classList.remove('change');
-        mobileNav.style.display = 'none';
-    });
-
-
-    // Close mobile nav when clicking outside the menu
-    window.addEventListener('click', function (e) {
-        if (!e.target.matches('.burger-menu') && !mobileNav.contains(e.target)) {
-            burgerMenu.classList.remove('change');
-            mobileNav.style.display = 'none';
-        }
-    });
-
     // Contact form submission
     const contactForm = document.getElementById('contact-form');
     contactForm.addEventListener('submit', function (e) {
@@ -270,7 +546,123 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-// File: Privacy.txt
+// File: blog-admin/frontend/login.html
+<!DOCTYPE html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Admin - login</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="admin.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+	<header>
+		<h1>The Roaming Physio</h1>
+		<p>Admin Login</p>
+		<div class="burger-menu">
+			<div class="line1"></div>
+			<div class="line2"></div>
+			<div class="line3"></div>
+		</div>
+		<nav class="mobile-nav">
+			<span class="close-btn">x </div></span>
+			<a href="index.html">Home</a>
+	</header>
+
+	<nav>
+		<a href="index.html">Home</a>
+	</nav>
+
+	<!--Login Form For The Admin Portal-->
+	<section id="contact" class="blog-preview">
+		<h2>Log in</h2>
+		<form id="loginForm" action="#">
+			<div class="label">
+				<label for="username">Username:</label>
+				<input type="text" id="username" name="username" autocomplete="username" required>
+			</div>
+			<div class="password-container">
+				<label for="password">Password:</label>
+				<input type="password" id="password" name="password" autocomplete="current-password" required>
+				<i class="far fa-eye eye-icon" id="togglePassword"></i>
+			</div>
+			<button type="submit">login</button>
+		</form>
+	</section>
+
+	<footer>
+		<p>Contact Information:</p>
+		<p>The Roaming Physio</p>
+		<p>Email: <a href="briviallan@gmail.com">briviallan@gmail.com</a></p>
+		<p>Phone: (+254) 7481-67395</p>
+		<p>Follow us on social media:
+			<a href="#">Facebook</a> |
+			<a href="#">Twitter</a> |
+			<a href="#">Instagram</a>
+		</p>
+		<p>
+			<a href="./index.html">Home</a> |
+			<a href="#about">About</a> |
+			<a href="#services">Services</a> |
+			<a href="#testimonials">Testimonials</a> |
+			<a href="#blog">Blog</a> |
+			<a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio">Contact</a>
+		</p>
+		<p><a href="./Privacy.txt" target="_blank">Privacy Policy</a></p>
+	</footer>
+
+	<script src="./login.js"></script>
+	<script src="./burger.js"></script>
+</body>
+</html>
+
+
+// File: blog-admin/frontend/login.js
+document.getElementById('loginForm').addEventListener('submit', async (event) => {
+	event.preventDefault();
+
+	const username = document.getElementById('username').value;
+	const password = document.getElementById('password').value;
+
+	try {
+		const response = await fetch('http://192.168.0.101:3000/api/login', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ username, password })
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json();
+			throw new Error(errorData.message || 'Network response was not ok');
+		}
+
+		const data = await response.json();
+		console.log('Login successful:', data);
+		// Handle successful login
+	} catch (error) {
+		console.error('Error during login:', error.message);
+		/* Display user Error */
+		alert(error.message);
+	}
+});
+
+/* Hide and Unhide password */
+const togglePassword = document.getElementById('togglePassword');
+const passwordInput = document.getElementById('password');
+
+togglePassword.addEventListener('click', function () {
+	// Toggle the type attribute
+	const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+	passwordInput.setAttribute('type', type);
+	// Toggle the eye slash icon
+	this.classList.toggle('fa-eye-slash');
+});
+
+
+// File: blog-admin/frontend/Privacy.txt
 Privacy Policy
 
 At The Roaming Physio, we value your privacy and are committed to protecting your personal information. This privacy policy outlines how we collect, use, and safeguard the information you provide to us through our website.
@@ -300,12 +692,7 @@ Contact Us
 If you have any questions or concerns about our privacy practices, please contact us at [briviallan@gmail.com].
 
 
-// File: README.md
-# theroamingphysio.github.io
-
-
-
-// File: reviews.js
+// File: blog-admin/frontend/reviews.js
 const contactForm = document.getElementById('contact-form');
 const testimonialContainer = document.querySelector('.testimonials');
 
@@ -355,7 +742,7 @@ contactForm.addEventListener('submit', function (e) {
 });
 
 function fetchTestimonials() {
-    fetch('YOUR_SCRIPT_URL') // URL of your Google Apps Script
+    fetch('https://script.google.com/macros/s/AKfycbxrhCip6lJoyNPN5zExEhprtisD6KKpUOPXTWbtGVA6LqLzgX0mkp-PdtA8DiDxw54_/exec') // URL of your Google Apps Script
     .then(response => response.json())
     .then(testimonials => {
         const testimonialList = document.querySelector('.testimonial-list');
@@ -372,7 +759,7 @@ document.addEventListener('DOMContentLoaded', fetchTestimonials);
 
 
 
-// File: style.css
+// File: blog-admin/frontend/style.css
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -541,7 +928,7 @@ body:not(.loading) .loader {
     }
 
     .testimonials .testimonial-img,
-    .blog-preview .blog-img {
+    .blog-preview {
         margin-right: 0;
         margin-bottom: 1rem;
     }
@@ -633,7 +1020,7 @@ body:not(.loading) .loader {
 
 /* Contact form */
 /* Form styles */
-#contact-form {
+#contact-form, #loginForm{
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
@@ -700,10 +1087,137 @@ button[type="submit"]:hover {
     width: 50px;
     height: 50px;
     margin-right: 20px;
-    background-image: url('human-icon.png');
+    background-image: url('./resources/images/human-icon.png');
     background-size: cover;
     background-position: center;
     border-radius: 50%;
 }
+
+/* Blog Articles */
+.blog-preview {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.blog-articles {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+.blog-preview-container {
+    flex: 0 0 300px; /* Adjust the width as needed */
+    scroll-snap-align: start;
+    margin-right: 20px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.blog-preview-container:last-child {
+    margin-right: 0;
+}
+
+.blog-image {
+    width: 100%;
+    height: 200px; /* Adjust the height as needed */
+    object-fit: cover;
+    filter: brightness(0.7); /* Darken the image */
+}
+
+.blog-preview-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%);
+    color: #fff;
+}
+
+.blog-preview-content h3 {
+    margin-top: 0;
+}
+
+.blog-preview-content a {
+    color: black;
+    text-decoration: none;
+}
+
+.blog-preview-content a:hover {
+    text-decoration: underline;
+}
+
+/* Smaller screens in Blog rtcle preview */
+@media (max-width: 767px) {
+    .blog-preview {
+        padding: 10px;
+    }
+
+    .blog-articles {
+        flex-direction: column;
+        overflow-x: unset;
+    }
+
+    .blog-preview-container {
+        flex: 0 0 auto;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .blog-image {
+        height: 150px;
+    }
+
+    .blog-preview-content {
+        position: static;
+        background: none;
+        padding: 10px;
+        color: #333;
+    }
+}
+
+/* The eye on the Login Password box */
+.password-container .eye-icon {
+    position: relative;
+    right: -95%;
+    bottom: 47px;
+    cursor: pointer;
+
+}
+
+
+// File: Privacy.txt
+Privacy Policy
+
+At The Roaming Physio, we value your privacy and are committed to protecting your personal information. This privacy policy outlines how we collect, use, and safeguard the information you provide to us through our website.
+
+Information Collection
+We may collect personal information such as your name and email address when you submit a form or inquiry through our website. We may also collect non-personal information like your IP address and browser type for analytical purposes.
+
+Use of Information
+The personal information we collect is used to respond to your inquiries, provide requested services, and communicate with you about our offerings. We may also use non-personal information for website analysis and improvement.
+
+Information Sharing and Disclosure
+We do not share or disclose your personal information with third parties, except when required by law or to provide requested services.
+
+Data Security
+We implement reasonable security measures to protect your personal information from unauthorized access, use, or disclosure.
+
+Third-Party Links and Services
+Our website may contain links to third-party websites or services. We are not responsible for the privacy practices of these external sites and encourage you to review their privacy policies.
+
+Children's Privacy
+Our website is not intended for children under the age of 13, and we do not knowingly collect personal information from children.
+
+Changes to Privacy Policy
+We may update this privacy policy from time to time. We encourage you to review this page regularly for any changes.
+
+Contact Us
+If you have any questions or concerns about our privacy practices, please contact us at [briviallan@gmail.com].
 
 
