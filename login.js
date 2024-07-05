@@ -1,11 +1,16 @@
+// login.js
+import { getServerAddress } from "./functions.js";
+
 document.getElementById('loginForm').addEventListener('submit', async (event) => {
 	event.preventDefault();
 
 	const username = document.getElementById('username').value;
 	const password = document.getElementById('password').value;
 
+	serverURL = getServerAddress();
+
 	try {
-		const response = await fetch('http://192.168.0.101:3000/api/login', {
+		const response = await fetch(`${serverURL}/api/login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -39,3 +44,4 @@ togglePassword.addEventListener('click', function () {
 	// Toggle the eye slash icon
 	this.classList.toggle('fa-eye-slash');
 });
+

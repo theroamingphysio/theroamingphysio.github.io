@@ -1,3 +1,4 @@
+// burger.js
 // Burger Menu Functionality
 const burgerMenu = document.querySelector('.burger-menu');
 const mobileNav = document.querySelector('.mobile-nav');
