@@ -1,3 +1,4 @@
+// server.js
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
@@ -5,6 +6,29 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const authRoutes = require('./auth'); // Import auth routes
 const dotenv = require('dotenv');
+const os = require('os');
+const fs = require('fs');
+
+
+// Get the Machine's Local IP and Assign It to .env file
+function getLocalIPAddress() {
+    const interfaces = os.networkInterfaces();
+    for (const ifaceName in interfaces) {
+        const iface = interfaces[ifaceName];
+        for (const alias of iface) {
+            if (alias.family === 'IPv4' && !alias.internal) {
+                return alias.address;
+            }
+        }
+    }
+    return '127.0.0.1';
+}
+
+const PORT = process.env.port || 3000;
+const IP_ADDRESS = getLocalIPAddress();
+/** update .env */
+const envContent = `IP_ADDRESS=${IP_ADDRESS}\nPORT=${PORT}`;
+fs.writeFileSync('.env', envContent);
 
 dotenv.config();
 
@@ -51,8 +75,13 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
-const IP_ADDRESS = process.env.IP_ADDRESS || '0.0.0.0';
+app.post('/api/server-info', (req, res) => {
+    res.json({
+        ipAddress: getLocalIPAddress(),
+        port: process.env.PORT || 3000
+    });
+});
+
 app.listen(PORT,IP_ADDRESS, () => {
     console.log(`Server running on http://${IP_ADDRESS}:${PORT}`)
 });

@@ -1,103 +1,4 @@
-// File: blog-admin/backend/auth.js
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-
-dotenv.config();
-
-const router = express.Router();
-
-// Mock user for demonstration
-const mockUser = {
-    username: 'testuser',
-    passwordHash: bcrypt.hashSync('testpassword', 10), // Hash the password for storage
-};
-
-// Login Route
-router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-    
-    if (username !== mockUser.username) {
-        return res.status(401).json({ message: 'Invalid username' });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, mockUser.passwordHash);
-    if (!isPasswordValid) {
-        return res.status(401).json({ message: 'Invalid password' });
-    }
-
-    const token = jwt.sign({ username: mockUser.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-});
-
-module.exports = router;
-
-
-
-// File: blog-admin/backend/server.js
-const express = require('express');
-const multer = require('multer');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const path = require('path');
-const authRoutes = require('./auth'); // Import auth routes
-const dotenv = require('dotenv');
-
-dotenv.config();
-
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-app.use('/api', authRoutes); // Use auth routes
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
-const upload = multer({ storage });
-
-app.post('/upload', upload.single('image'), (req, res) => {
-    if (req.file) {
-        res.json({ imageUrl: `/uploads/${req.file.filename}` });
-    } else {
-        res.status(400).json({ error: 'No file uploaded' });
-    }
-});
-
-app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
-    console.log('Received login attempt:', username, password);
-
-    try {
-        const authResult = await authenticate(username, password);
-
-        if (authResult.success) {
-            res.json({ message: authResult.message, token: authResult.token });
-        } else {
-            res.status(401).json({ message: authResult.message });
-        }
-    } catch (error) {
-        console.error('Error during authentication:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-
-const PORT = process.env.PORT || 3000;
-const IP_ADDRESS = process.env.IP_ADDRESS || '0.0.0.0';
-app.listen(PORT,IP_ADDRESS, () => {
-    console.log(`Server running on http://${IP_ADDRESS}:${PORT}`)
-});
-
-
-
-// File: blog-admin/frontend/admin.css
+// File: admin.css
 /* Admin styles specific to admin page */
 .container {
 	max-width: 800px;
@@ -136,12 +37,13 @@ form button:hover {
 
 
 
-// File: blog-admin/frontend/admin.html
+// File: admin.html
 <!DOCTYPE html>
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Admin - Blog Post</title>
+	<link rel="icon" type="image/png" href="./resources/images/the roaming physio.png">
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="admin.css">
 </head>
@@ -214,50 +116,196 @@ form button:hover {
 </html>
 
 
-// File: blog-admin/frontend/admin.js
+// File: admin.js
 // admin.js
+let serverUrl = '/';
+
+// Fetch server info when the page loads
+fetch('/api/server-info')
+    .then(response => response.json())
+    .then(data => {
+        serverUrl = `http://${data.ipAddress}:${data.port}`;
+        console.log('Server URL:', serverUrl);
+    })
+    .catch(error => {
+        console.error('Error fetching server info:', error);
+        serverUrl = '/'; // Fallback to relative path if fetch fails
+    });
 
 document.getElementById('blog-form').addEventListener('submit', function (e) {
     e.preventDefault();
 
+    if (!serverUrl) {
+        alert('Server information not available. Please try again.');
+        return;
+    }
+
     const formData = new FormData();
-    const imageFile = document.getElementById('image').files[0];
-    
+    const imageFile = document.getEl
+
     formData.append('title', document.getElementById('title').value);
     formData.append('date', document.getElementById('date').value);
     formData.append('excerpt', document.getElementById('excerpt').value);
     formData.append('content', document.getElementById('content').value);
     formData.append('image', imageFile);
 
-    fetch('http://localhost:3000/upload', {
+
+    fetch(`${serverUrl}/upload`, {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.imageUrl) {
-            const blogPost = {
-                title: document.getElementById('title').value,
-                date: document.getElementById('date').value,
-                excerpt: document.getElementById('excerpt').value,
-                content: document.getElementById('content').value,
-                image: data.imageUrl
-            };
-            let blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
-            blogPosts.push(blogPost);
-            localStorage.setItem('blogPosts', JSON.stringify(blogPosts));
-            alert('Blog post published!');
-            this.reset();
-        } else {
-            alert('Image upload failed');
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.imageUrl) {
+                const blogPost = {
+                    title: document.getElementById('title').value,
+                    date: document.getElementById('date').value,
+                    excerpt: document.getElementById('excerpt').value,
+                    content: document.getElementById('content').value,
+                    image: data.imageUrl
+                };
+                let blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+                blogPosts.push(blogPost);
+                localStorage.setItem('blogPosts', JSON.stringify(blogPosts));
+                alert('Blog post published!');
+                this.reset();
+            } else {
+                alert('Image upload failed');
+            }
+        })
+        .catch(error => console.error('Error:', error));
 });
 
 
 
-// File: blog-admin/frontend/blog.js
+// File: backend/auth.js
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const router = express.Router();
+
+// Mock user for demonstration
+const mockUser = {
+    username: 'testuser',
+    passwordHash: bcrypt.hashSync('testpassword', 10), // Hash the password for storage
+};
+
+// Login Route
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    
+    if (username !== mockUser.username) {
+        return res.status(401).json({ message: 'Invalid username' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, mockUser.passwordHash);
+    if (!isPasswordValid) {
+        return res.status(401).json({ message: 'Invalid password' });
+    }
+
+    const token = jwt.sign({ username: mockUser.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
+});
+
+module.exports = router;
+
+
+
+// File: backend/server.js
+const express = require('express');
+const multer = require('multer');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const path = require('path');
+const authRoutes = require('./auth'); // Import auth routes
+const dotenv = require('dotenv');
+const os = require('os');
+const fs = require('fs');
+
+
+// Get the Machine's Local IP and Assign It to .env file
+function getLocalIPAddress() {
+    const interfaces = os.networkInterfaces();
+    for (const ifaceName in interfaces) {
+        const iface = interfaces[ifaceName];
+        for (const alias of iface) {
+            if (alias.family === 'IPv4' && !alias.internal) {
+                return alias.address;
+            }
+        }
+    }
+    return '127.0.0.1';
+}
+
+const PORT = process.env.port || 3000;
+const IP_ADDRESS = getLocalIPAddress();
+/** update .env */
+const envContent = `IP_ADDRESS=${IP_ADDRESS}\nPORT=${PORT}`;
+fs.writeFileSync('.env', envContent);
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+app.use('/api', authRoutes); // Use auth routes
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
+
+app.post('/upload', upload.single('image'), (req, res) => {
+    if (req.file) {
+        res.json({ imageUrl: `/uploads/${req.file.filename}` });
+    } else {
+        res.status(400).json({ error: 'No file uploaded' });
+    }
+});
+
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    console.log('Received login attempt:', username, password);
+
+    try {
+        const authResult = await authenticate(username, password);
+
+        if (authResult.success) {
+            res.json({ message: authResult.message, token: authResult.token });
+        } else {
+            res.status(401).json({ message: authResult.message });
+        }
+    } catch (error) {
+        console.error('Error during authentication:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.get('/api/server-info', (req, res) => {
+    res.json({
+        ipAddress: getLocalIPAddress(),
+        port: process.env.PORT || 3000
+    });
+});
+
+app.listen(PORT,IP_ADDRESS, () => {
+    console.log(`Server running on http://${IP_ADDRESS}:${PORT}`)
+});
+
+
+
+// File: blog.js
 // In your script.js file
 /*const blogArticles = [
 	{
@@ -315,7 +363,8 @@ loadMoreButton.addEventListener('click', loadBlogArticles);
 console.log(localStorage.getItem('blogPosts'));
 
 
-// File: blog-admin/frontend/burger.js
+// File: burger.js
+// burger.js
 // Burger Menu Functionality
 const burgerMenu = document.querySelector('.burger-menu');
 const mobileNav = document.querySelector('.mobile-nav');
@@ -338,7 +387,7 @@ window.addEventListener('click', function (e) {
 
 
 
-// File: blog-admin/frontend/index.html
+// File: index.html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -348,7 +397,7 @@ window.addEventListener('click', function (e) {
     <meta name="description"
         content="The Roaming Physio - Bringing Expert Physiotherapy to Your Doorstep. Personalized care, wherever you are.">
     <title>The Roaming Physio</title>
-    <link rel="icon" type="image/png" href="path/to/your/favicon.png">
+    <link rel="icon" type="image/png" href="./resources/images/the roaming physio.png">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -511,7 +560,7 @@ window.addEventListener('click', function (e) {
 
 
 
-// File: blog-admin/frontend/index.js
+// File: index.js
 window.onload = function () {
     document.body.classList.remove('loading');
 };
@@ -546,7 +595,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-// File: blog-admin/frontend/login.html
+// File: login.html
 <!DOCTYPE html>
 <head>
 	<meta charset="UTF-8">
@@ -554,6 +603,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	<title>Admin - login</title>
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="admin.css">
+	<link rel="icon" type="image/png" href="./resources/images/the roaming physio.png">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -618,15 +668,33 @@ document.addEventListener('DOMContentLoaded', function () {
 </html>
 
 
-// File: blog-admin/frontend/login.js
+// File: login.js
+// login.js
 document.getElementById('loginForm').addEventListener('submit', async (event) => {
 	event.preventDefault();
 
 	const username = document.getElementById('username').value;
 	const password = document.getElementById('password').value;
 
+	// Function to get the local IP address of the machine
+	function getLocalIPAddress() {
+		const interfaces = os.networkInterfaces();
+		for (const ifaceName in interfaces) {
+			const iface = interfaces[ifaceName];
+			for (const alias of iface) {
+				if (alias.family === 'IPv4' && !alias.internal) {
+					return alias.address;
+				}
+			}
+		}
+		return '127.0.0.1';
+	}
+
+	const HOST = getLocalIPAddress(); // Get the dynamic IP address
+
+
 	try {
-		const response = await fetch('http://192.168.0.101:3000/api/login', {
+		const response = await fetch(`http://${HOST}:3000/api/login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -662,7 +730,7 @@ togglePassword.addEventListener('click', function () {
 });
 
 
-// File: blog-admin/frontend/Privacy.txt
+// File: Privacy.txt
 Privacy Policy
 
 At The Roaming Physio, we value your privacy and are committed to protecting your personal information. This privacy policy outlines how we collect, use, and safeguard the information you provide to us through our website.
@@ -692,7 +760,8 @@ Contact Us
 If you have any questions or concerns about our privacy practices, please contact us at [briviallan@gmail.com].
 
 
-// File: blog-admin/frontend/reviews.js
+// File: reviews.js
+// reviews.js
 const contactForm = document.getElementById('contact-form');
 const testimonialContainer = document.querySelector('.testimonials');
 
@@ -759,7 +828,7 @@ document.addEventListener('DOMContentLoaded', fetchTestimonials);
 
 
 
-// File: blog-admin/frontend/style.css
+// File: style.css
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -1189,35 +1258,5 @@ button[type="submit"]:hover {
     cursor: pointer;
 
 }
-
-
-// File: Privacy.txt
-Privacy Policy
-
-At The Roaming Physio, we value your privacy and are committed to protecting your personal information. This privacy policy outlines how we collect, use, and safeguard the information you provide to us through our website.
-
-Information Collection
-We may collect personal information such as your name and email address when you submit a form or inquiry through our website. We may also collect non-personal information like your IP address and browser type for analytical purposes.
-
-Use of Information
-The personal information we collect is used to respond to your inquiries, provide requested services, and communicate with you about our offerings. We may also use non-personal information for website analysis and improvement.
-
-Information Sharing and Disclosure
-We do not share or disclose your personal information with third parties, except when required by law or to provide requested services.
-
-Data Security
-We implement reasonable security measures to protect your personal information from unauthorized access, use, or disclosure.
-
-Third-Party Links and Services
-Our website may contain links to third-party websites or services. We are not responsible for the privacy practices of these external sites and encourage you to review their privacy policies.
-
-Children's Privacy
-Our website is not intended for children under the age of 13, and we do not knowingly collect personal information from children.
-
-Changes to Privacy Policy
-We may update this privacy policy from time to time. We encourage you to review this page regularly for any changes.
-
-Contact Us
-If you have any questions or concerns about our privacy practices, please contact us at [briviallan@gmail.com].
 
 
