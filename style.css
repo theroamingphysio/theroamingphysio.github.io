@@ -3,23 +3,24 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
+    min-height: 100vh;
 }
 
 header {
-    background: #581845;
-    color: #fff;
+    background: #20A0D8;
+    color: #FFFF;
     padding: 10px 0;
     text-align: center;
 }
 
 nav {
     text-align: center;
-    background: #a45022;
+    background: #262626;
     padding: 10px 0;
 }
 
 nav a {
-    color: #fff;
+    color: #FFFF;
     margin: 0 15px;
     text-decoration: none;
 }
@@ -27,7 +28,7 @@ nav a {
 .hero {
     position: relative;
     background: url('./resources/images/Physiotherapy.jpg') no-repeat center center/cover;
-    color: #fff;
+    color: #FFFF;
     height: 400px;
     display: flex;
     flex-direction: column;
@@ -61,12 +62,14 @@ nav a {
 }
 
 .cta {
-    background: #e8491d;
-    color: #fff;
+    background: #262626;
+    color: #FFFF;
     padding: 10px 20px;
     text-decoration: none;
     margin-top: 20px;
     display: inline-block;
+    border-radius: 10px;
+    border:solid #20A0D8 1px;
 }
 
 .container {
@@ -77,6 +80,27 @@ nav a {
     color: #333;
 }
 
+#welcome {
+    border-radius: 10px;
+    border-color: #262626;
+    background-color: #FFFF;
+    max-height: fit-content;
+    padding: 10px 20px;
+}
+
+.service-block {
+    width:fit-content;
+    height: auto;
+    padding: 20px;
+    /* background-color: #333; */
+    margin: 10px;
+}
+
+.service-block img {
+    float: none;
+    width:100px;
+
+}
 .testimonials blockquote,
 .blog-preview article {
     display: flex;
@@ -94,7 +118,7 @@ nav a {
 .services,
 .testimonials,
 .blog-preview {
-    background: #fff;
+    background: #FFFF;
     padding: 20px;
     margin: 20px 0;
     border-radius: 10px;
@@ -102,22 +126,22 @@ nav a {
 }
 
 footer {
-    background: #333;
-    color: #fff;
+    background: #262626;
+    color: #FFFF;
     text-align: center;
     padding: 10px 0;
 }
 
 footer a {
-    color: #fff;
+    color: #FFFF;
     margin: 0 10px;
     text-decoration: none;
 }
 
 /* For Preloader */
 .loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
+    border: 4px solid #FFFF;
+    border-top: 4px solid #20A0D8;
     border-radius: 50%;
     width: 30px;
     height: 30px;
@@ -186,7 +210,7 @@ body:not(.loading) .loader {
 .line3 {
     width: 30px;
     height: 3px;
-    background-color: #fff;
+    background-color: #FFFF;
     margin: 6px 0;
     transition: 0.4s;
     transform-origin: center;
@@ -198,17 +222,22 @@ body:not(.loading) .loader {
     position: fixed;
     top: 0;
     right: 0;
-    width: 200px;
-    height: fit-content;
-    background-color: #333;
+    width: 140px;
+    height: 200px;
+    /* background-color: #262626; */
+    background: transparent;
+    backdrop-filter: blur(12px);
     padding: 20px;
     z-index: 999;
+    top:50px;
     overflow-y: auto;
+    border-radius: 5px;
+    scrollbar-width:none;
 }
 
 .mobile-nav a {
     display: block;
-    color: #fff;
+    color: #FFFF;
     text-decoration: none;
     padding: 10px;
 }
@@ -218,7 +247,7 @@ body:not(.loading) .loader {
     top: 10px;
     right: 10px;
     font-size: 24px;
-    color: #fff;
+    color: #FFFF;
     cursor: pointer;
 }
 
@@ -251,8 +280,8 @@ body:not(.loading) .loader {
 .testimonials blockquote {
     margin: 10px, 0;
     padding: 10px;
-    background-color: #f5f5f5;
-    border-left: 4px solid #333;
+    background-color: #FFFF;
+    border-left: 4px solid #262626;
 }
 
 
@@ -262,7 +291,7 @@ body:not(.loading) .loader {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f4f4f4;
+    background-color: #FFFF;
     border-radius: 4px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -277,7 +306,7 @@ input[type="email"],
 textarea {
     width: 100%;
     padding: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #262626;
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 16px;
@@ -289,8 +318,8 @@ textarea {
 }
 
 button[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #262626;
+    color: #FFFF;
     padding: 12px 20px;
     border: none;
     border-radius: 4px;
@@ -299,7 +328,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #45a049;
+    background-color: #20A0D8;
 }
 
 /* Block Quote Container Styles For Dynamic Testimonials */

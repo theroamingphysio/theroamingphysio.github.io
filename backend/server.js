@@ -49,6 +49,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// save uploaded file
 app.post('/upload', upload.single('image'), (req, res) => {
     if (req.file) {
         res.json({ imageUrl: `/uploads/${req.file.filename}` });
@@ -57,6 +58,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
     }
 });
 
+// authenticate and tokenize sessions
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     console.log('Received login attempt:', username, password);
