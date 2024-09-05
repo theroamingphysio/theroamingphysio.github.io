@@ -1,3 +1,62 @@
+// File: address-provider/server.js
+// File: address-provider/server.js
+const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
+const os = require('os');
+
+const app = express();
+const PORT = 4000;
+
+function getLocalIPAddress() {
+    const interfaces = os.networkInterfaces();
+    for (const ifaceName in interfaces) {
+        const iface = interfaces[ifaceName];
+        for (const alias of iface) {
+            if (alias.family === 'IPv4' && !alias.internal) {
+                return alias.address;
+            }
+        }
+    }
+    return '127.0.0.1';
+}
+
+const HOST = getLocalIPAddress();
+
+app.use(cors());
+app.use(express.json());
+
+let backendAddress = null;
+
+app.post('/register-backend', (req, res) => {
+    const { ip, port } = req.body;
+    backendAddress = `http://${ip}:${port}`;
+    // console.log('Backend registered:', backendAddress);
+    res.json({ 
+        message: 'Backend address registered successfully',
+        addressProviderInfo: {
+            ip: HOST,
+            port: PORT
+        }
+    });
+});
+
+app.post('/get-backend-address', (req, res) => {
+    const { passcode } = req.body;
+    if (passcode !== '9062002') {
+        return res.status(401).json({ error: 'Invalid passcode' });
+    }
+    if (!backendAddress) {
+        return res.status(404).json({ error: 'Backend address not registered' });
+    }
+    res.json({ address: backendAddress });
+});
+
+app.listen(PORT, HOST, () => {
+    console.log(`Address provider running on http://${HOST}:${PORT}`);
+});
+
+
 // File: admin.css
 /* Admin styles specific to admin page */
 .container {
@@ -118,50 +177,42 @@ form button:hover {
 
 // File: admin.js
 // admin.js
-let serverUrl = '/';
 
-// Fetch server info when the page loads
-fetch('/api/server-info')
-    .then(response => response.json())
-    .then(data => {
-        serverUrl = `http://${data.ipAddress}:${data.port}`;
-        console.log('Server URL:', serverUrl);
-    })
-    .catch(error => {
-        console.error('Error fetching server info:', error);
-        serverUrl = '/'; // Fallback to relative path if fetch fails
-    });
+import { getServerAddress } from "./login";
+
+serverUrl = getServerAddress; // LAter Inut backend server url
+
 
 document.getElementById('blog-form').addEventListener('submit', function (e) {
     e.preventDefault();
-
+    
     if (!serverUrl) {
         alert('Server information not available. Please try again.');
         return;
     }
-
+    
     const formData = new FormData();
     const imageFile = document.getEl
-
+    
     formData.append('title', document.getElementById('title').value);
     formData.append('date', document.getElementById('date').value);
     formData.append('excerpt', document.getElementById('excerpt').value);
     formData.append('content', document.getElementById('content').value);
     formData.append('image', imageFile);
-
-
+    
+    
     fetch(`${serverUrl}/upload`, {
         method: 'POST',
         body: formData
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.imageUrl) {
-                const blogPost = {
-                    title: document.getElementById('title').value,
-                    date: document.getElementById('date').value,
-                    excerpt: document.getElementById('excerpt').value,
-                    content: document.getElementById('content').value,
+    .then(response => response.json())
+    .then(data => {
+        if (data.imageUrl) {
+            const blogPost = {
+                title: document.getElementById('title').value,
+                date: document.getElementById('date').value,
+                excerpt: document.getElementById('excerpt').value,
+                content: document.getElementById('content').value,
                     image: data.imageUrl
                 };
                 let blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
@@ -216,6 +267,7 @@ module.exports = router;
 
 
 // File: backend/server.js
+// server.js
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
@@ -266,6 +318,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// save uploaded file
 app.post('/upload', upload.single('image'), (req, res) => {
     if (req.file) {
         res.json({ imageUrl: `/uploads/${req.file.filename}` });
@@ -274,6 +327,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
     }
 });
 
+// authenticate and tokenize sessions
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     console.log('Received login attempt:', username, password);
@@ -292,7 +346,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-app.get('/api/server-info', (req, res) => {
+app.post('/api/server-info', (req, res) => {
     res.json({
         ipAddress: getLocalIPAddress(),
         port: process.env.PORT || 3000
@@ -306,56 +360,14 @@ app.listen(PORT,IP_ADDRESS, () => {
 
 
 // File: blog.js
-// In your script.js file
-/*const blogArticles = [
-	{
-		title: '5 Exercises to Improve Your Posture',
-		date: 'May 15, 2024',
-		excerpt: 'Good posture is crucial for overall health. Here are five exercises to help you maintain a healthy posture...',
-		link: '#'
-	},
-	{
-		title: 'How to Prevent Workplace Injuries',
-		date: 'May 22, 2024',
-		excerpt: 'Workplace injuries are common but preventable. Follow these tips to create a safer work environment...',
-		link: '#'
-	},
-	]; */
+// blog.js
 
-	// Add more blog article objects here
-    // blog.js
+import { loadBlogArticles } from "./functions";
+
 const blogContainer = document.querySelector('.blog-articles');
 const loadMoreButton = document.querySelector('.load-more');
 let currentIndex = 0;
 const articlesPerLoad = 2;
-
-function loadBlogArticles() {
-    let blogArticles = JSON.parse(localStorage.getItem('blogPosts')) || [];
-    if (!blogArticles.length) {
-        blogContainer.innerHTML = '<p>No blog posts available.</p>';
-        loadMoreButton.style.display = 'none';
-        return;
-    }
-    const endIndex = currentIndex + articlesPerLoad;
-    for (let i = currentIndex; i < endIndex && i < blogArticles.length; i++) {
-        const article = blogArticles[i];
-        const articleElement = document.createElement('article');
-        articleElement.innerHTML = `
-        <div class="blog-preview-container">
-        <img class="blog-image" src="/blog-admin/backend${article.image}" alt="${article.title}">
-        <div class="blog-preview-content">
-            <h3>${article.title}</h3>
-            <p><em>${article.date}</em> - ${article.excerpt} <a href="#">Read more</a></p>
-        </div>
-    </div>
-        `;
-        blogContainer.appendChild(articleElement);
-    }
-    currentIndex = endIndex;
-    if (currentIndex >= blogArticles.length) {
-        loadMoreButton.style.display = 'none';
-    }
-}
 
 document.addEventListener('DOMContentLoaded', loadBlogArticles);
 loadMoreButton.addEventListener('click', loadBlogArticles);
@@ -387,6 +399,102 @@ window.addEventListener('click', function (e) {
 
 
 
+// File: functions.js
+// functions.js
+
+/**
+ * getServerAddress - gets the Ip Adress: 0.0.0.0 and port: 0000
+ * 					of The backend server // Needs a 3rd party mitigator for security
+ * @returns URL of server and port.
+ */
+function getServerAddress() {
+	// Fetch server info when the page loads
+	return fetch(`${serverUrl}/api/server-info'`)
+		.then(response => response.json())
+		.then(data => {
+			serverUrl = `http://${data.ipAddress}:${data.port}`;
+			console.log('Server URL:', serverUrl);
+		})
+		.catch(error => {
+			console.error('Error fetching server info:', error);
+			serverUrl = '/'; // Fallback to relative path if fetch fails
+		});
+};
+
+/**
+ * loadBlogArticles - adds blog articles to preview, if any
+ * @returns : No blog post avilabe if No blog posts have been added
+ * 			and or don't exist in memory
+ */
+function loadBlogArticles() {
+    let blogArticles = JSON.parse(localStorage.getItem('blogPosts')) || [];
+    if (!blogArticles.length) {
+        blogContainer.innerHTML = '<p>No blog posts available.</p>';
+        loadMoreButton.style.display = 'none';
+        return;
+    }
+    const endIndex = currentIndex + articlesPerLoad;
+    for (let i = currentIndex; i < endIndex && i < blogArticles.length; i++) {
+        const article = blogArticles[i];
+        const articleElement = document.createElement('article');
+        articleElement.innerHTML = `
+        <div class="blog-preview-container">
+        <img class="blog-image" src="/blog-admin/backend${article.image}" alt="${article.title}">
+        <div class="blog-preview-content">
+            <h3>${article.title}</h3>
+            <p><em>${article.date}</em> - ${article.excerpt} <a href="#">Read more</a></p>
+        </div>
+    </div>
+        `;
+        blogContainer.appendChild(articleElement);
+    }
+    currentIndex = endIndex;
+    if (currentIndex >= blogArticles.length) {
+        loadMoreButton.style.display = 'none';
+    }
+}
+
+
+/**
+ * fetchTestimonials - Fetches Data sets on the reviews posted on 
+ * 		the home page from Google Sheets using script extension i wrote.
+ */
+function fetchTestimonials() {
+    fetch('https://script.google.com/macros/s/AKfycbxrhCip6lJoyNPN5zExEhprtisD6KKpUOPXTWbtGVA6LqLzgX0mkp-PdtA8DiDxw54_/exec') // URL of your Google Apps Script
+    .then(response => response.json())
+    .then(testimonials => {
+        const testimonialList = document.querySelector('.testimonial-list');
+        testimonialList.innerHTML = ''; // Clear current testimonials
+        testimonials.forEach(testimonial => {
+            addTestimonial(testimonial.name, testimonial.message);
+        });
+    })
+    .catch(error => console.error('Error fetching testimonials:', error));
+}
+
+/**
+ * addTestimonial - Adds fetched testimonials 
+ * 					to the reiews and testimonial section.
+ */
+function addTestimonial(name, message) {
+    const testimonialList = document.querySelector('.testimonial-list');
+    const newTestimonial = document.createElement('blockquote');
+    newTestimonial.innerHTML = `
+        <div class="testimonial-img"></div>
+        <div>
+            <p>${message}</p>
+            <p>- ${name}</p>
+        </div>
+    `;
+    testimonialList.appendChild(newTestimonial);
+}
+
+export function getServerAddress() {}
+export function loadBlogArticles () {}
+export function  fetchTestimonials () {}
+export function addTestimonial () {}
+
+
 // File: index.html
 <!DOCTYPE html>
 <html lang="en">
@@ -401,7 +509,7 @@ window.addEventListener('click', function (e) {
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="loaging">
+<body class="loading">
     <header>
         <h1>The Roaming Physio</h1>
         <p>"Bringing Expert Physiotherapy to Your Doorstep"</p>
@@ -410,21 +518,22 @@ window.addEventListener('click', function (e) {
             <div class="line2"></div>
             <div class="line3"></div>
         </div>
+
+        <!-- Small Screen NAV Bar -->
         <nav class="mobile-nav">
-            <span class="close-btn">x </div></span>
-            <a href="./login.html" target="_blank">Login</a>
-            <a href="#">Home</a>
-            <a href="#about">About</a>
-            <a href="#services">Services</a>
-            <a href="#testimonials">Testimonials</a>
-            <a href="#blog">Blog</a>
-            <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio" target="_blank">Contact</a>
+            <span class="close-btn">x </div>
+                <a href="./login.html" target="_blank" rel="noopener noreferrer">Login</a>
+                <a href="#about">About</a>
+                <a href="#services">Services</a>
+                <a href="#testimonials">Testimonials</a>
+                <a href="#blog">Blog</a>
+                <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio" target="_blank">Contact</a>
         </nav>
     </header>
 
+    <!-- Large screen NAV Bar-->
     <nav>
         <a href="./login.html" target="_blank">Login</a>
-        <a href="#">Home</a>
         <a href="#about">About</a>
         <a href="#services">Services</a>
         <a href="#testimonials">Testimonials</a>
@@ -432,6 +541,7 @@ window.addEventListener('click', function (e) {
         <a href="https://wa.me/+254748167395?text=Hello%20Roaming%20Physio" target="_blank">Contact</a>
     </nav>
 
+    <!--The Hero Section -->
     <section class="hero">
         <div class="overlay"></div>
         <div class="hero-content">
@@ -445,23 +555,42 @@ window.addEventListener('click', function (e) {
     <div class="container">
         <section id="about">
             <h2>Welcome to The Roaming Physio</h2>
-            <p>At The Roaming Physio, we believe in delivering top-notch physiotherapy services directly to your
-                location. Whether you need treatment at home, work, or elsewhere, our expert physiotherapist, Brivia, is
-                here to help. We specialize in personalized care tailored to your specific needs, ensuring you get the
-                best treatment without the hassle of travel.</p>
+            <div id="welcome">
+                <p>At The Roaming Physio, we believe in delivering top-notch physiotherapy services directly to your
+                    location. Whether you need treatment at home, work, or elsewhere, our expert physiotherapist,
+                    Brivia, is
+                    here to help. We specialize in personalized care tailored to your specific needs, ensuring you get
+                    the
+                    best treatment without the hassle of travel.</p>
+            </div>
         </section>
 
         <section id="services" class="services">
             <h2>Our Services</h2>
             <ul>
-                <li><strong>In-Home Physiotherapy:</strong> Personalized treatment plans designed to meet your unique
-                    needs in the comfort of your home.</li>
-                <li><strong>Workplace Wellness:</strong> On-site physiotherapy and ergonomic assessments to keep you
-                    healthy and productive at work.</li>
-                <li><strong>Sports Rehabilitation:</strong> Specialized care for sports injuries to help you get back in
-                    the game faster.</li>
-                <li><strong>Post-Surgical Rehab:</strong> Comprehensive post-operative care to ensure a smooth and
-                    successful recovery.</li>
+                <li>
+                    <div class="service-block"><strong>In-Home Physiotherapy:</strong> Personalized treatment plans
+                        designed to meet your unique
+                        needs in the comfort of your home. <img src="./resources/images/physiotherapeutic.png"
+                            alt="hometherapy"></div>
+                </li>
+                <li>
+                    <div class="service-block"></div.service-block><strong>Workplace Wellness:</strong> On-site
+                        physiotherapy and ergonomic assessments to keep you
+                        healthy and productive at work. <img src="./resources/images/pain.png" alt="hometherapy"> </div>
+                </li>
+                <li>
+                    <div class="service-block"><strong>Sports Rehabilitation:</strong> Specialized care for sports
+                        injuries to help you get back in
+                        the game faster. <img src="./resources/images/leg (1).png" alt="hometherapy">
+                    </div>
+                </li>
+                <li>
+                    <div class="service-block"><strong>Post-Surgical Rehab:</strong> Comprehensive post-operative care
+                        to ensure a smooth and
+                        successful recovery. <img src="./resources/images/recovery.png" alt="hometherapy">
+                    </div>
+                </li>
             </ul>
         </section>
 
@@ -469,7 +598,7 @@ window.addEventListener('click', function (e) {
             <h2>What Our Clients Say</h2>
             <blockquote>
                 <img src="./resources/images/human-icon.png" alt="Testimonial from Sarah T." class="testimonial-img">
-                "Brivia provided exceptional care after my knee surgery. The convenience of in-home visits made my
+                "The Roaming Physio provided exceptional care after my knee surgery. The convenience of in-home visits made my
                 recovery so much easier. Highly recommend!" - Sarah T.
             </blockquote>
             <blockquote>
@@ -497,7 +626,7 @@ window.addEventListener('click', function (e) {
             </article>
         </section> -->
 
-        <!-- In your HTML -->
+<!-- Blog Preview To Workout Database and Enable Active Preview -->
         <section id="blog" class="blog-preview">
             <h2>Latest from Our Blog</h2>
             <div class="blog-articles"></div>
@@ -556,8 +685,8 @@ window.addEventListener('click', function (e) {
     <script src="./reviews.js"></script>
     <script src="./burger.js"></script>
 </body>
-</html>
 
+</html>
 
 
 // File: index.js
@@ -669,32 +798,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // File: login.js
-// login.js
+/* login.js */ import { getServerAddress } from "./functions.js";
+
+
+/* Take Username and passowrd and submit to backend */
 document.getElementById('loginForm').addEventListener('submit', async (event) => {
 	event.preventDefault();
-
+	
 	const username = document.getElementById('username').value;
 	const password = document.getElementById('password').value;
-
-	// Function to get the local IP address of the machine
-	function getLocalIPAddress() {
-		const interfaces = os.networkInterfaces();
-		for (const ifaceName in interfaces) {
-			const iface = interfaces[ifaceName];
-			for (const alias of iface) {
-				if (alias.family === 'IPv4' && !alias.internal) {
-					return alias.address;
-				}
-			}
-		}
-		return '127.0.0.1';
-	}
-
-	const HOST = getLocalIPAddress(); // Get the dynamic IP address
-
+	
+	serverURL = getServerAddress();
 
 	try {
-		const response = await fetch(`http://${HOST}:3000/api/login`, {
+		const response = await fetch(`${serverURL}/api/login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -730,53 +847,14 @@ togglePassword.addEventListener('click', function () {
 });
 
 
-// File: Privacy.txt
-Privacy Policy
-
-At The Roaming Physio, we value your privacy and are committed to protecting your personal information. This privacy policy outlines how we collect, use, and safeguard the information you provide to us through our website.
-
-Information Collection
-We may collect personal information such as your name and email address when you submit a form or inquiry through our website. We may also collect non-personal information like your IP address and browser type for analytical purposes.
-
-Use of Information
-The personal information we collect is used to respond to your inquiries, provide requested services, and communicate with you about our offerings. We may also use non-personal information for website analysis and improvement.
-
-Information Sharing and Disclosure
-We do not share or disclose your personal information with third parties, except when required by law or to provide requested services.
-
-Data Security
-We implement reasonable security measures to protect your personal information from unauthorized access, use, or disclosure.
-
-Third-Party Links and Services
-Our website may contain links to third-party websites or services. We are not responsible for the privacy practices of these external sites and encourage you to review their privacy policies.
-
-Children's Privacy
-Our website is not intended for children under the age of 13, and we do not knowingly collect personal information from children.
-
-Changes to Privacy Policy
-We may update this privacy policy from time to time. We encourage you to review this page regularly for any changes.
-
-Contact Us
-If you have any questions or concerns about our privacy practices, please contact us at [briviallan@gmail.com].
-
 
 // File: reviews.js
 // reviews.js
+
+import { fetchTestimonials, addTestimonial } from "./functions";
+
 const contactForm = document.getElementById('contact-form');
 const testimonialContainer = document.querySelector('.testimonials');
-
-function addTestimonial(name, message) {
-    const testimonialList = document.querySelector('.testimonial-list');
-    const newTestimonial = document.createElement('blockquote');
-    newTestimonial.innerHTML = `
-        <div class="testimonial-img"></div>
-        <div>
-            <p>${message}</p>
-            <p>- ${name}</p>
-        </div>
-    `;
-    testimonialList.appendChild(newTestimonial);
-}
 
 contactForm.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -810,19 +888,6 @@ contactForm.addEventListener('submit', function (e) {
     });
 });
 
-function fetchTestimonials() {
-    fetch('https://script.google.com/macros/s/AKfycbxrhCip6lJoyNPN5zExEhprtisD6KKpUOPXTWbtGVA6LqLzgX0mkp-PdtA8DiDxw54_/exec') // URL of your Google Apps Script
-    .then(response => response.json())
-    .then(testimonials => {
-        const testimonialList = document.querySelector('.testimonial-list');
-        testimonialList.innerHTML = ''; // Clear current testimonials
-        testimonials.forEach(testimonial => {
-            addTestimonial(testimonial.name, testimonial.message);
-        });
-    })
-    .catch(error => console.error('Error fetching testimonials:', error));
-}
-
 // Fetch testimonials when the page loads
 document.addEventListener('DOMContentLoaded', fetchTestimonials);
 
@@ -834,23 +899,24 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
+    min-height: 100vh;
 }
 
 header {
-    background: #581845;
-    color: #fff;
+    background: #20A0D8;
+    color: #FFFF;
     padding: 10px 0;
     text-align: center;
 }
 
 nav {
     text-align: center;
-    background: #a45022;
+    background: #262626;
     padding: 10px 0;
 }
 
 nav a {
-    color: #fff;
+    color: #FFFF;
     margin: 0 15px;
     text-decoration: none;
 }
@@ -858,7 +924,7 @@ nav a {
 .hero {
     position: relative;
     background: url('./resources/images/Physiotherapy.jpg') no-repeat center center/cover;
-    color: #fff;
+    color: #FFFF;
     height: 400px;
     display: flex;
     flex-direction: column;
@@ -892,12 +958,14 @@ nav a {
 }
 
 .cta {
-    background: #e8491d;
-    color: #fff;
+    background: #262626;
+    color: #FFFF;
     padding: 10px 20px;
     text-decoration: none;
     margin-top: 20px;
     display: inline-block;
+    border-radius: 10px;
+    border:solid #20A0D8 1px;
 }
 
 .container {
@@ -908,6 +976,27 @@ nav a {
     color: #333;
 }
 
+#welcome {
+    border-radius: 10px;
+    border-color: #262626;
+    background-color: #FFFF;
+    max-height: fit-content;
+    padding: 10px 20px;
+}
+
+.service-block {
+    width:fit-content;
+    height: auto;
+    padding: 20px;
+    /* background-color: #333; */
+    margin: 10px;
+}
+
+.service-block img {
+    float: none;
+    width:100px;
+
+}
 .testimonials blockquote,
 .blog-preview article {
     display: flex;
@@ -925,7 +1014,7 @@ nav a {
 .services,
 .testimonials,
 .blog-preview {
-    background: #fff;
+    background: #FFFF;
     padding: 20px;
     margin: 20px 0;
     border-radius: 10px;
@@ -933,22 +1022,22 @@ nav a {
 }
 
 footer {
-    background: #333;
-    color: #fff;
+    background: #262626;
+    color: #FFFF;
     text-align: center;
     padding: 10px 0;
 }
 
 footer a {
-    color: #fff;
+    color: #FFFF;
     margin: 0 10px;
     text-decoration: none;
 }
 
 /* For Preloader */
 .loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
+    border: 4px solid #FFFF;
+    border-top: 4px solid #20A0D8;
     border-radius: 50%;
     width: 30px;
     height: 30px;
@@ -1017,7 +1106,7 @@ body:not(.loading) .loader {
 .line3 {
     width: 30px;
     height: 3px;
-    background-color: #fff;
+    background-color: #FFFF;
     margin: 6px 0;
     transition: 0.4s;
     transform-origin: center;
@@ -1029,17 +1118,22 @@ body:not(.loading) .loader {
     position: fixed;
     top: 0;
     right: 0;
-    width: 200px;
-    height: fit-content;
-    background-color: #333;
+    width: 140px;
+    height: 200px;
+    /* background-color: #262626; */
+    background: transparent;
+    backdrop-filter: blur(12px);
     padding: 20px;
     z-index: 999;
+    top:50px;
     overflow-y: auto;
+    border-radius: 5px;
+    scrollbar-width:none;
 }
 
 .mobile-nav a {
     display: block;
-    color: #fff;
+    color: #FFFF;
     text-decoration: none;
     padding: 10px;
 }
@@ -1049,7 +1143,7 @@ body:not(.loading) .loader {
     top: 10px;
     right: 10px;
     font-size: 24px;
-    color: #fff;
+    color: #FFFF;
     cursor: pointer;
 }
 
@@ -1082,8 +1176,8 @@ body:not(.loading) .loader {
 .testimonials blockquote {
     margin: 10px, 0;
     padding: 10px;
-    background-color: #f5f5f5;
-    border-left: 4px solid #333;
+    background-color: #FFFF;
+    border-left: 4px solid #262626;
 }
 
 
@@ -1093,7 +1187,7 @@ body:not(.loading) .loader {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f4f4f4;
+    background-color: #FFFF;
     border-radius: 4px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -1108,7 +1202,7 @@ input[type="email"],
 textarea {
     width: 100%;
     padding: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #262626;
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 16px;
@@ -1120,8 +1214,8 @@ textarea {
 }
 
 button[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #262626;
+    color: #FFFF;
     padding: 12px 20px;
     border: none;
     border-radius: 4px;
@@ -1130,7 +1224,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #45a049;
+    background-color: #20A0D8;
 }
 
 /* Block Quote Container Styles For Dynamic Testimonials */
