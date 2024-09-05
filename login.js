@@ -1,12 +1,13 @@
-// login.js
-import { getServerAddress } from "./functions.js";
+/* login.js */ import { getServerAddress } from "./functions.js";
 
+
+/* Take Username and passowrd and submit to backend */
 document.getElementById('loginForm').addEventListener('submit', async (event) => {
 	event.preventDefault();
-
+	
 	const username = document.getElementById('username').value;
 	const password = document.getElementById('password').value;
-
+	
 	serverURL = getServerAddress();
 
 	try {
@@ -44,4 +45,3 @@ togglePassword.addEventListener('click', function () {
 	// Toggle the eye slash icon
 	this.classList.toggle('fa-eye-slash');
 });
-
