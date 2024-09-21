@@ -13,6 +13,16 @@ header {
     text-align: center;
 }
 
+.pacifico-regular {
+    font-family: "Pacifico", cursive;
+    font-weight: 400;
+    font-style: normal;
+  }  
+
+header h1 {
+    font-family: "Pacifico", cursive;
+}
+
 nav {
     text-align: center;
     background: #262626;
@@ -27,7 +37,7 @@ nav a {
 
 .hero {
     position: relative;
-    background: url('./resources/images/Physiotherapy.jpg') no-repeat center center/cover;
+    background: url('./resources/images/person-on-bed.jpeg') no-repeat center center/cover;
     color: #FFFF;
     height: 400px;
     display: flex;
@@ -78,6 +88,7 @@ nav a {
 
 .container h2 {
     color: #333;
+    text-align: center;
 }
 
 #welcome {
