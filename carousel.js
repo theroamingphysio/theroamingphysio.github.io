@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let isScrolling = false;
     let autoScrollInterval;
     let slidesPerView = 1;
+    let isReversed = false;
 
     function updateSlidesPerView() {
         const containerWidth = carousel.offsetWidth;
@@ -22,45 +23,33 @@ document.addEventListener('DOMContentLoaded', function () {
         return Math.max(1, slidesPerView);
     }
 
-    function setupInfiniteScroll() {
-        const totalSlides = services.length;
-        for (let i = 0; i < totalSlides * 2; i++) {
-            const clone = services[i % totalSlides].cloneNode(true);
-            carousel.appendChild(clone);
-        }
-    }
-
     function updateCarouselPosition(smooth = true) {
         const slideWidth = services[0].offsetWidth;
         const offset = -currentIndex * slideWidth;
         carousel.style.transition = smooth ? 'transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)' : 'none';
         carousel.style.transform = `translateX(${offset}px)`;
-
-        if (!smooth) {
-            // Force a reflow
-            carousel.offsetHeight;
-            carousel.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
-        }
-
-        // Check if we need to jump to the other end for infinite loop
-        const totalSlides = carousel.children.length;
-        if (currentIndex <= slidesPerView) {
-            currentIndex += services.length;
-            setTimeout(() => updateCarouselPosition(false), 300);
-        } else if (currentIndex >= totalSlides - slidesPerView * 2) {
-            currentIndex -= services.length;
-            setTimeout(() => updateCarouselPosition(false), 300);
-        }
     }
 
     function moveCarousel(direction) {
-        currentIndex += direction * slidesPerView;
+        const totalSlides = services.length;
+        currentIndex += direction;
+
+        if (currentIndex < 0) {
+            currentIndex = 0;
+            isReversed = false;
+        } else if (currentIndex >= (totalSlides + 2) - slidesPerView) {
+            currentIndex = totalSlides - slidesPerView;
+            isReversed = true;
+        }
+
         updateCarouselPosition();
     }
 
     function startAutoScroll() {
         stopAutoScroll();
-        autoScrollInterval = setInterval(() => moveCarousel(1), 6000);
+        autoScrollInterval = setInterval(() => {
+            moveCarousel(isReversed ? -1 : 1);
+        }, 6000);
     }
 
     function stopAutoScroll() {
@@ -75,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
         distX = 0;
         distY = 0;
         carousel.style.cursor = 'grabbing';
-        e.preventDefault(); // Prevent text selection
+        e.preventDefault();
     }
 
     function handleDrag(e) {
@@ -103,8 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const slideWidth = services[0].offsetWidth;
         const movedSlides = Math.round(distX / slideWidth);
-        currentIndex -= movedSlides;
-        updateCarouselPosition();
+        moveCarousel(-movedSlides);
 
         carousel.style.cursor = 'grab';
         startX = null;
@@ -135,7 +123,6 @@ document.addEventListener('DOMContentLoaded', function () {
     slidesPerView = updateSlidesPerView();
     updateCarouselPosition(false);
     startAutoScroll();
-    setupInfiniteScroll();
 
     // Prevent text selection
     carousel.addEventListener('selectstart', (e) => e.preventDefault());

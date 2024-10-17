@@ -110,7 +110,6 @@ nav a {
 .carousel {
     display: flex;
     transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-    /* scroll-snap-type: x mandatory; */
 }
 
 .service {
@@ -160,7 +159,11 @@ nav a {
 
 
 /* Responsive design carousel */
-
+@media (min-width: 768px) {
+    .service {
+        flex: 0 0 50%;
+    }
+}
 
 @media (min-width: 1024px) {
     .service {
