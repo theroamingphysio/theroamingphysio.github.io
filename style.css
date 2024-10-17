@@ -7,7 +7,7 @@ body {
 }
 
 header {
-    background: #20A0D8;
+    background: #20a0d8;
     color: #FFFF;
     padding: 10px 0;
     text-align: center;
@@ -17,7 +17,7 @@ header {
     font-family: "Pacifico", cursive;
     font-weight: 400;
     font-style: normal;
-  }  
+}
 
 header h1 {
     font-family: "Pacifico", cursive;
@@ -79,7 +79,7 @@ nav a {
     margin-top: 20px;
     display: inline-block;
     border-radius: 10px;
-    border:solid #20A0D8 1px;
+    border: solid #20A0D8 1px;
 }
 
 .container {
@@ -99,19 +99,81 @@ nav a {
     padding: 10px 20px;
 }
 
+/** Carousel CSS **/
+.carousel-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding: 20px 0;
+}
+
+.carousel {
+    display: flex;
+    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    /* scroll-snap-type: x mandatory; */
+}
+
+.service {
+    flex: 0 0 100%;
+    margin: 0 20px;
+    box-sizing: border-box;
+    height: 100%;
+}
+
 .service-block {
-    width:fit-content;
-    height: auto;
+    background-color: #ebedee;
+    border-radius:10px;
     padding: 20px;
-    /* background-color: #333; */
-    margin: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
 }
 
 .service-block img {
     float: none;
-    width:100px;
-
+    width: 100px;
+    
 }
+
+.prev-btn,
+.next-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateX(-25%);
+    z-index: 10;
+    background-color: rgba(55, 238, 229, 0.774);
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.prev-btn:hover,.next-btn:hover {
+    background-color: rgba(33, 158, 152, 0.774);
+}
+.prev-btn {
+    left: 10px;
+}
+
+.next-btn {
+    right: 10px;
+}
+
+
+/* Responsive design carousel */
+@media (min-width: 768px) {
+    .service {
+        flex: 0 0 50%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .service {
+        flex: 0 0 33.333%;
+    }
+}
+
+
+/* End of carousel */
 .testimonials blockquote,
 .blog-preview article {
     display: flex;
@@ -135,6 +197,8 @@ nav a {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
+
 
 footer {
     background: #262626;
@@ -240,10 +304,10 @@ body:not(.loading) .loader {
     backdrop-filter: blur(12px);
     padding: 20px;
     z-index: 999;
-    top:50px;
+    top: 50px;
     overflow-y: auto;
     border-radius: 5px;
-    scrollbar-width:none;
+    scrollbar-width: none;
 }
 
 .mobile-nav a {
@@ -298,7 +362,8 @@ body:not(.loading) .loader {
 
 /* Contact form */
 /* Form styles */
-#contact-form, #loginForm{
+#contact-form,
+#loginForm {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
@@ -387,7 +452,8 @@ button[type="submit"]:hover {
 }
 
 .blog-preview-container {
-    flex: 0 0 300px; /* Adjust the width as needed */
+    flex: 0 0 300px;
+    /* Adjust the width as needed */
     scroll-snap-align: start;
     margin-right: 20px;
     position: relative;
@@ -401,9 +467,11 @@ button[type="submit"]:hover {
 
 .blog-image {
     width: 100%;
-    height: 200px; /* Adjust the height as needed */
+    height: 200px;
+    /* Adjust the height as needed */
     object-fit: cover;
-    filter: brightness(0.7); /* Darken the image */
+    filter: brightness(0.7);
+    /* Darken the image */
 }
 
 .blog-preview-content {
