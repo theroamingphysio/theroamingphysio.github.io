@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function startAutoScroll() {
         stopAutoScroll();
-        autoScrollInterval = setInterval(() => moveCarousel(1), 5000);
+        autoScrollInterval = setInterval(() => moveCarousel(1), 6000);
     }
 
     function stopAutoScroll() {
@@ -132,10 +132,10 @@ document.addEventListener('DOMContentLoaded', function () {
         updateCarouselPosition(false);
     });
 
-    setupInfiniteScroll();
     slidesPerView = updateSlidesPerView();
     updateCarouselPosition(false);
     startAutoScroll();
+    setupInfiniteScroll();
 
     // Prevent text selection
     carousel.addEventListener('selectstart', (e) => e.preventDefault());
