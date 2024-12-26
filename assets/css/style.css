@@ -1,0 +1,202 @@
+/*==================================
+* Author        : "ThemeSine"
+* Template Name : Zombiz
+* Version       : 1.0
+==================================== */
+
+/*==================================
+
+font-family: 'Playfair Display', serif;
+font-family: 'Poppins', sans-serif;
+font-family: 'Lato', sans-serif;
+
+==================================== */
+
+
+/*=========== TABLE OF CONTENTS ===========
+1.  General css (Reset code)
+2. 	Header
+
+
+===========*/
+/*-------------------------------------
+		1.General css (Reset code)
+--------------------------------------*/
+*{
+    padding: 0;
+    margin: 0;
+}
+
+*{
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-o-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+	box-sizing:border-box;
+}
+body{
+	font-size:14px;
+	background: #fff;
+    max-width:1920px;
+    margin:0 auto;
+	overflow-x:hidden;
+}
+
+a,a:hover,a:active,a:focus {
+	display:inline-block;
+	text-decoration:none;
+	font-size:14px;
+	padding:0;
+}
+h1,h2,h3,h4,h5,h6 { 
+	margin: 0;
+	text-transform: capitalize;
+}
+p {
+	margin: 0;
+	font-size:14px;
+}
+img{	border:none;max-width:100%; height:auto;}
+ul{
+	padding: 0;
+    margin: 0;
+    list-style: none;
+}
+ul li {
+	list-style: none;
+	
+}
+select,input,textarea{box-shadow:none;outline:0!important;}
+
+
+html,body{
+    height: 100%;
+	position: relative;
+    z-index: 2;
+}
+[placeholder]:focus::-webkit-input-placeholder {
+  -webkit-transition: opacity 0.3s 0.3s ease; 
+  -moz-transition: opacity 0.3s 0.3s ease; 
+  -ms-transition: opacity 0.3s 0.3s ease; 
+  -o-transition: opacity 0.3s 0.3s ease; 
+  transition: opacity 0.3s 0.3s ease; 
+  opacity: 0;
+}
+
+/*=============Style css=========*/
+
+/*-------------------------------------
+		2. Header
+--------------------------------------*/
+.header{padding: 120px 0 72px;}
+.header-part{
+	color: #7370d8;
+	text-align: center;
+	font-family: 'Poppins', sans-serif;
+}
+.header-part h2 {font-size: 64px;font-weight: 700;margin-bottom: 35px;}
+.header-part span {text-transform: capitalize;}
+.header-part h3 {font-size:36px;font-weight: 600;}
+
+
+/*-------------------------------------
+		2. page-verson
+--------------------------------------*/
+.page-verson{padding: 0 0 60px;}
+.single-page-verson-part {
+    max-width: 458px;
+    margin: 0 auto;
+}
+.page-verson-img {
+	position: relative;
+    height: 415px;
+    box-shadow: 0 15px 20px rgba(78,132,253,.1);
+    -webkit-transition: .5s; 
+	-moz-transition:.5s; 
+	-ms-transition:.5s; 
+	-o-transition:.5s;
+    transition: .5s;
+}
+.bg-1 {background: url(../images/1.jpg)no-repeat center;}
+.bg-2 {background: url(../images/2.jpg)no-repeat center;}
+
+.page-verson-img-overlay{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(115,112,216,0);
+	-webkit-transform: scale(0); 
+	-moz-transform:scale(0); 
+	-ms-transform:scale(0); 
+	-o-transform:scale(0);
+    transform: scale(0);
+
+}
+
+.page-verson-img:hover {
+	box-shadow: 0 15px 20px rgba(78,132,253,.3);
+}
+.page-verson-img:hover .page-verson-img-overlay{
+	-webkit-transform: scale(1); 
+	-moz-transform:scale(1); 
+	-ms-transform:scale(1); 
+	-o-transform:scale(1);
+    transform: scale(1);
+    -webkit-transition: .5s; 
+	-moz-transition:.5s; 
+	-ms-transition:.5s; 
+	-o-transition:.5s;
+    transition: .5s;
+}
+
+.single-page-verson-part h3 a{
+	display: inherit;
+    color: #7370d8;
+    font-size: 18px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 45px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+
+/*===============================
+    Scroll Top
+===============================*/
+#scroll-Top  .return-to-top {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    display: none;
+    width: 40px;
+    line-height: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 30px;
+    cursor: pointer;
+    z-index:15;
+    color: #fff;
+    background:#7370d8;
+	border:1px solid #7370d8;
+	border-radius:5px;
+	-webkit-transition: .5s; 
+	-moz-transition:.5s; 
+	-ms-transition:.5s; 
+	-o-transition:.5s;
+    transition: .5s;
+	z-index: 2;
+}
+#scroll-Top  .return-to-top:hover {
+    background:#7370d8;
+    color: #fff;
+	border:1px solid #7370d8;
+	border-radius:50%;
+}
+
+/*========================Thank you=================
