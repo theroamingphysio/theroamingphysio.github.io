@@ -26,6 +26,7 @@
 }/*max-width:1008px*/
 
 @media screen and (max-width:992px){
+	header.top-area .header-area .navbar {width: 100vw;}
 	nav.navbar.bootsnav .navbar-collapse.collapse.in {padding-bottom: 30px;}
 	nav.navbar.bootsnav .navbar-toggle {display: inline-block; float: right;margin-right: 0;margin-top: 21px;}
 	nav.navbar.bootsnav .navbar-brand {float: left!important;}
